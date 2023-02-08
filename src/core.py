@@ -87,7 +87,7 @@ class Power4(object):
         print(f'The game is over, {self.cells_repr[winner]}  won !')
         sys.exit(1)
 
-    def run(self) -> None:
+    def shell_run(self) -> None:
         running = True
         i = 1
         while running:
