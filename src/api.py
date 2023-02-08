@@ -1,6 +1,7 @@
 from core import Power4
 
 from flask import Flask, Response
+from flask_sqlalchemy import SQLAlchemy
 from dotenv import dotenv_values
 
 CONF = dotenv_values('.env')
