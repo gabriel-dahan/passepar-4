@@ -1,6 +1,8 @@
 from typing import List, Literal, Tuple
 import sys, os
 
+"""  Core file - Power4 engine """
+
 class Power4(object):
     _2DArray = List[List[int]]
     
