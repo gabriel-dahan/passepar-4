@@ -6,37 +6,17 @@ import sys, os
 class Power4(object):
     _2DArray = List[List[int]]
     
-    def __init__(self, cells_repr: Tuple[str] = (' ', '⬟', '⬠')) -> None:
+    def __init__(self, array: _2DArray = None, cells_repr: Tuple[str] = (' ', '⬟', '⬠')) -> None:
         self.cells_repr = cells_repr
-        self.arr = [[0] * 6 for _ in range(7)]
-    
-    def ask_player(self, player: int) -> int:
-        column = int(input(f"[ {self.cells_repr[player]} ] On which column do you want to place a pawn ? "))
-        assert column <= 7, 'Max column is 7.'
-        running = True
-        while running:
-            if self.arr[column][0] != 0:
-                column = int(input("--- The choosen column is full, please take another one : "))
-                continue
-            running = False 
-        return column
+        self.arr = array or [[0] * 7 for _ in range(6)]
 
-    def update_grid(self, player: int) -> _2DArray:
-        column = self.ask_player(player) - 1
-        for i in range(1, len(self.arr)):
-            line = -i
-            if self.arr[column][line] != 0:
+    def get_y_axis(self, column: int) -> int:
+        """ Returns -1 if no space is left. """
+        for i in range(len(self.arr) + 1):
+            print(self.arr[i][column])
+            if self.arr[i][column] == 0 and i != len(self.arr):
                 continue
-            self.arr[column][line] = player
-            return self.arr
-        return self.arr
-
-    def format_grid(self) -> str:
-        return ''.join(
-            ' | '.join([self.cells_repr[self.arr[i][j]] for i in range(len(self.arr))])
-            + '\n--------------------------\n'
-            for j in range(len(self.arr) - 1)
-        )
+            return i - 1
 
     def get_rows(self) -> _2DArray:
         return [
@@ -80,14 +60,22 @@ class Power4(object):
         diag_check = [self.check_in(diag) for diag in self.get_diagonals()]
         general_check = columns_check + rows_check + diag_check
         for winner in general_check:
-            if winner == 0: continue
+            if winner == 0: 
+                continue
             return winner
         return 0
 
-    def end_game(self):
-        winner = self.check_end()
-        print(f'The game is over, {self.cells_repr[winner]}  won !')
-        sys.exit(1)
+    """ --- LOCAL-SHELL RUN OF THE GAME --- """
+
+    def update_grid(self, player: int) -> _2DArray:
+        column = self.ask_player(player) - 1
+        for i in range(1, len(self.arr)):
+            line = -i
+            if self.arr[column][line] != 0:
+                continue
+            self.arr[column][line] = player
+            return self.arr
+        return self.arr
 
     def shell_run(self) -> None:
         running = True
@@ -101,6 +89,29 @@ class Power4(object):
             i += 1
             self.clear()
             print(self.format_grid())
+
+    def ask_player(self, player: int) -> int:
+        column = int(input(f"[ {self.cells_repr[player]} ] On which column do you want to place a pawn ? "))
+        assert column <= 7, 'Max column is 7.'
+        running = True
+        while running:
+            if self.arr[column][0] != 0:
+                column = int(input("--- The choosen column is full, please take another one : "))
+                continue
+            running = False 
+        return column
+
+    def format_grid(self) -> str:
+        return ''.join(
+            ' | '.join([self.cells_repr[self.arr[i][j]] for i in range(len(self.arr))])
+            + '\n--------------------------\n'
+            for j in range(len(self.arr) - 1)
+        )
+
+    def end_game(self):
+        winner = self.check_end()
+        print(f'The game is over, {self.cells_repr[winner]}  won !')
+        sys.exit(1)
 
     @classmethod
     def clear(cls) -> None:
