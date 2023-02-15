@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+h1 {
+    font-family: 'Press Start 2P', cursive;
+    color: #39F63B;
+    text-align: center;
+    margin-top: 4rem;
+    animation-duration: .8s;
+    animation-name: clignoter;
+    animation-iteration-count: infinite;
+    transition: none;
+  
+}
+
+body {
+    background-color:#1D1D1D;
+  }
+
+form {
+  text-align: center;
+  color: #39F63B;
+  font-family: 'Share Tech Mono', cursive;
+  animation: caret .5s step-end infinite alternate,
+             type 5s steps(23, end)
+}
+
+
+
+@keyframes type {
+  0% {
+    width: 0;
+  }
+
+}
+@keyframes caret { 
+  50% { 
+    box-shadow: .6em 0 0 transparent;
+  }
+}
+
+
+
+@keyframes clignoter {
+ 0%   { opacity:1; }
+ 40%   {opacity:0; }
+ 100% { opacity:1; }
+}
