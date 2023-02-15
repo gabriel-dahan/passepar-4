@@ -18,11 +18,11 @@ def int_grid_as_linear(int_grid: List[List[int]]) -> str:
 
 """
 ERR. CODES : 
-    - 1 : invalid coordinates
-    - 2 : game doesn't exist
-    - 3 : no space left on the choosen column
-    - 4 : a POST request must be executed
-    - 5 : max number of players reached
+    - G1 : invalid coordinates
+    - G2 : game doesn't exist
+    - G3 : no space left on the choosen column
+    - G4 : a POST request must be executed
+    - G5 : max number of players reached
 """
 
 # --- GAME API --- #
@@ -36,7 +36,7 @@ class AddPlayer(Resource):
         game = Game.query.filter_by(id = gamekey).first()
         if len(game.players) >= 2:
             return jsonify({
-                'code': 5,
+                'code': 'G1',
                 'message': 'The maximum number of players has already been reached.'
             })
         p = Player(ip = ip, name = name, game_id = gamekey)
@@ -54,7 +54,7 @@ class GameChange(Resource):
         column = int(args.get('column'))
         if not game:
             return jsonify({
-                'code': 2,
+                'code': 'G2',
                 'message': f'Game with id \'{gamekey}\' does not exist.'
             })
         matrix_transform = linear_as_int_grid(game.matrix)
@@ -62,7 +62,7 @@ class GameChange(Resource):
         line = p4.get_y_axis(column)
         if line == -1:
             return jsonify({
-                'code': 3,
+                'code': 'G3',
                 'message': 'No space is left on this column.'
             })
         matrix_transform[line][column] = game.turn
@@ -78,7 +78,7 @@ class GameInfo(Resource):
         game = Game.query.filter_by(id = gamekey).first()
         if not game:
             return jsonify({
-                'code': 2,
+                'code': 'G2',
                 'message': f'Game with id \'{gamekey}\' does not exist.'
             })
         return jsonify(game)
@@ -89,7 +89,7 @@ class GameInfo(Resource):
 class NewGame(Resource):
     def get(self):
         return jsonify({
-            'code': 4,
+            'code': 'G4',
             'message': 'A POST request must be executed at this endpoint.'
         })
 

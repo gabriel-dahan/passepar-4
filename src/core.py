@@ -13,7 +13,6 @@ class Power4(object):
     def get_y_axis(self, column: int) -> int:
         """ Returns -1 if no space is left. """
         for i in range(len(self.arr) + 1):
-            print(self.arr[i][column])
             if self.arr[i][column] == 0 and i != len(self.arr):
                 continue
             return i - 1
