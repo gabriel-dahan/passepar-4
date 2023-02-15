@@ -22,5 +22,4 @@ app.config['SQLALCHEMY_DATABASE_URI'] = CONF['DB_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from src.core import Power4
-from src import resources
+from src.resources import games, players

@@ -1,21 +1,28 @@
 from typing import List, Literal, Tuple
 import sys, os
 
-"""  Core file - Power4 engine """
+"""  Core file -  engine """
 
-class Power4(object):
+class GameCore(object):
+    _2DArray = List[List[int]]
+    
+    def __init__(self, array: _2DArray) -> None:
+        self.arr = array
+
+    def get_y_pos(self, column_pos: int) -> int:
+        column = [line[column_pos] for line in self.arr][::-1]
+        for i, elem in enumerate(column):
+            if elem != 0:
+                continue
+            return len(column) - 1 - i
+        return -1
+
+class ShellPower4(object):
     _2DArray = List[List[int]]
     
     def __init__(self, array: _2DArray = None, cells_repr: Tuple[str] = (' ', '⬟', '⬠')) -> None:
         self.cells_repr = cells_repr
-        self.arr = array or [[0] * 7 for _ in range(6)]
-
-    def get_y_axis(self, column: int) -> int:
-        """ Returns -1 if no space is left. """
-        for i in range(len(self.arr) + 1):
-            if self.arr[i][column] == 0 and i != len(self.arr):
-                continue
-            return i - 1
+        self.arr = array or [[0] * 6 for _ in range(7)]
 
     def get_rows(self) -> _2DArray:
         return [
@@ -32,7 +39,7 @@ class Power4(object):
             return decr
         decr = get_decr_in(self.arr)
         # Getting an increasing diagonal in an array is the same as getting a decreasing one in the inverse of that array.
-        incr = get_decr_in(list(reversed(self.arr)))
+        incr = get_decr_in(self.arr[::-1])
         return decr + incr
     
     @classmethod
@@ -118,4 +125,4 @@ class Power4(object):
 
 if __name__ == '__main__':
     p4 = Power4()
-    p4.run()
+    p4.shell_run()
