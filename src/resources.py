@@ -81,7 +81,11 @@ class GameInfo(Resource):
                 'code': 'G2',
                 'message': f'Game with id \'{gamekey}\' does not exist.'
             })
-        return jsonify(game)
+        return jsonify({
+            'id': game.id,
+            'matrix': linear_as_int_grid(game.matrix),
+            'turn': game.turn
+        })
 
     def post(self, gamekey: str):
         return self.get(gamekey)
