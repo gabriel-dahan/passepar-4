@@ -16,14 +16,20 @@ console.log(
 
 function post(url) {
     fetch(url, {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
 
-        },
-    }).then(res => {
-        console.log("Request complete! response:", res);
-    });
+            },
+        }).then((response) => response.json())
+        .then((data) => {
+            console.log(data)
+            return (data)
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
 
-post("http://127.0.0.1:5000/api/game/new")
+
+console.log(post("http://127.0.0.1:5000/api/game/new"))
