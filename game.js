@@ -1,5 +1,5 @@
-var game_token = 0
-var len = function () {
+var game_token = 0 // is the current game token (game ID)
+var len = function () { // this function works likes the python len...
     return this.length;
 };
 
@@ -42,25 +42,25 @@ function generateTable(x, y, matrix) {
 function create_board(token) {
     let url = 'http://127.0.0.1:5000/api/game/'
     //// API request for the game board => url/api/game/game_id
-    fetch(url + token, {
+    fetch(url + token, { //here we call the api
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
 
             },
         }).then((response) => response.json())
-        .then((data) => {
-            /// cheking if the player dont tryed to bruteforce the api
+        .then((data) => { //here we handle the data given back from the api
+            /// cheking if the player dont tryed to bruteforce the api by modifing the token in the browser.
             if (token != data.id) {
                 alert("Houston we have a problem")
             } else {
 
-
+                // if not we generate the game board
                 generateTable(data.matrix.length, data.matrix[0].length, data.matrix)
 
 
             }
-        })
+        }) // if there is an error we catch it and log-it
         .catch((error) => {
             console.error('Error:', error);
         });
@@ -68,7 +68,8 @@ function create_board(token) {
 
 }
 
-
+// they will be some improvements to do here bc idk if it will work without reloading all the page.
+// we also have to add dynamically some classes and buttons on to the board to be playable if u have any other ideas to do this without a table open a thread bc idk if it's the best way to go. 
 function newgame(url) {
     fetch(url, {
             method: "POST",
@@ -87,6 +88,7 @@ function newgame(url) {
 }
 
 
+// here it's for restarting a new game with an alert i think we gonna to change it but I have done that for testing.
 if (confirm('Do you want to start a new game?')) {
     // Star it!
     console.log('Game started');
