@@ -53,10 +53,20 @@ class AddPlayer(Resource):
 
 class GameChange(Resource):
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('column', type = int, required = True, location = 'form')
+
     def put(self, gamekey: str):
         game = Game.query.filter_by(id = gamekey).first()
-        args = request.args
-        column = int(args.get('column'))
+        args = self.parser.parse_args()
+        column = args.get('column')
+        if column < 0 or column > 6:
+            return jsonify({
+                'code': 'G6',
+                'message': f'The choosen column must be between 0 and 6 (column : {column}).'
+            })
         if not game:
             return jsonify({
                 'code': 'G2',
