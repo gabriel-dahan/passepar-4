@@ -11,11 +11,11 @@
     
     - `player_id` : string
 
-- `/<gamekey>/update?column=` : [`PUT`] Adds a pawn in the given `column` if not full.
+- `/api/game/<gamekey>/update?column=` : [`PUT`] Adds a pawn in the given `column` if not full.
 
     - `column` : integer
 
-- `/<gamekey>/delete` : [`DELETE`] Deletes the game with id `gamekey` if it exists.
+- `/api/game/<gamekey>/delete` : [`DELETE`] Deletes the game with id `gamekey` if it exists.
 
 > **Error codes** : 
 >
