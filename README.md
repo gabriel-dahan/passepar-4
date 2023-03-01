@@ -1,4 +1,4 @@
-# Power IV
+# Connect Four - WEB Game
 ## INSTALL
 
 To install the project : 

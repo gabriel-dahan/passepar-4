@@ -5,7 +5,7 @@
 ### - **`/api/game`**
 
 - `/new` : [`POST`] Creates a new game record in the database.
-- `/list` : [`GET`] Returns the list of all currently active games.
+- `/list?onlyids=True` : [`GET`] Returns the list of all currently active games.
 - `/<gamekey>` : [`GET`] Returns informations about a given game.
 - `/<gamekey>/addplayer?id=` : [`POST`] Adds a player with given `id` in a game if it isn't full.
 - `/<gamekey>/update?column=` : [`PUT`] Adds a poon in the given `column` if not full.
@@ -16,7 +16,8 @@
 > - `G1` : Maximum number of players reached.
 > - `G2` : Game ID doesn't exist.
 > - `G3` : No space left on the choosen column.
-> - `G4` : ...
+> - `G4` : Requested player doesn't exist.
+> - `G5` : Player is already in a game.
 
 ### - **`/api/players`**
 
@@ -32,7 +33,7 @@
 
 > **Error codes** : 
 >
-> - `P1` : ...
+> - `P1-1` or `P1-2` : Player's email (`1`) or name (`2`) already exists in the database.
 > - `P2` : ...
 > - `P3` : ...
 > - `P4` : ...
