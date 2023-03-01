@@ -7,7 +7,7 @@
 - `/new` : [`POST`] Creates a new game record in the database.
 - `/list?onlyids=True` : [`GET`] Returns the list of all currently active games.
 - `/<gamekey>` : [`GET`] Returns informations about a given game.
-- `/<gamekey>/addplayer` : [`POST`] Adds a player with given `id` in a game if it isn't full.
+- `/<gamekey>/addplayer` : [`POST`] Adds a player with given `player_id` in a game if it isn't full.
     
     - `player_id` : string
 
