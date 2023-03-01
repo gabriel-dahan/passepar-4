@@ -11,7 +11,7 @@
     
     - `player_id` : string
 
-- `/api/game/<gamekey>/update?column=` : [`PUT`] Adds a pawn in the given `column` if not full.
+- `/api/game/<gamekey>/update` : [`PUT`] Adds a pawn in the given `column` if not full.
 
     - `column` : integer
 
@@ -36,6 +36,10 @@
 
 - `/api/player/<playerid>` : [`GET`] Returns informations about a given player.
 - `/api/player/<playerid>/update` : [`PUT`] Updates a player's informations.
+
+    - `name`: string (optional)
+    - `email` : string (optional)
+    - `password` : string (optional)
 
 > **Error codes** : 
 >

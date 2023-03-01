@@ -1,20 +1,10 @@
 from flask import jsonify, Response
 from flask_restful import Resource, request, reqparse
-from typing import List
 
 from .. import api, db
 from ..models import Game, Player
 from ..core import GameCore
-
-def linear_as_int_grid(linear_grid: str) -> List[List[int]]:
-    return [[int(elem) for elem in line] for line in linear_grid.split('-')]
-    
-def int_grid_as_linear(int_grid: List[List[int]]) -> str:
-    res = ''
-    for line in int_grid:
-        res += ''.join(str(elem) for elem in line)
-        res += '-'
-    return res[:-1]
+from ..etc import linear_as_int_grid, int_grid_as_linear
 
 # --- GAME API --- #
 
@@ -74,8 +64,8 @@ class GameChange(Resource):
             })
         
         matrix_transform = linear_as_int_grid(game.matrix)
-        p4 = GameCore(array = matrix_transform)
-        line = p4.get_y_pos(column)
+        c4 = GameCore(array = matrix_transform)
+        line = c4.get_y_pos(column)
         if line == -1:
             return jsonify({
                 'code': 'G3',
@@ -149,7 +139,7 @@ class NewGame(Resource):
 # -- RESOURCES -- #
 root = '/api/game'
 api.add_resource(AddPlayer, f'{root}/<string:gamekey>/addplayer')
-api.add_resource(GameChange, f'{root}/<string:gamekey>/update')
+api.add_resource(GameChange, f'{root}/<string:gamekey>/play')
 api.add_resource(GameDeletion, f'{root}/<string:gamekey>/delete')
 api.add_resource(GameInfo, f'{root}/<string:gamekey>')
 api.add_resource(GamesList, f'{root}/list')

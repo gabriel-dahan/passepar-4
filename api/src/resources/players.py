@@ -17,6 +17,7 @@ class PlayerUpdate(Resource):
         self.parser.add_argument('name', type = str, location = 'form')
         self.parser.add_argument('email', type = str, location = 'form')
         self.parser.add_argument('password', type = str, location = 'form')
+        self.parser.add_argument('score', type = int, location = 'form')
 
     def put(self, playerid: str) -> Response:
         player: Player = Player.query.filter_by(id = playerid).first()
@@ -30,7 +31,7 @@ class PlayerUpdate(Resource):
             if not val:
                 continue
             if key == 'password':
-                player.password = generate_password_hash(v)
+                player.password = generate_password_hash(val)
                 continue
             setattr(player, key, val)
         db.session.commit()

@@ -1,4 +1,5 @@
 from . import db
+from .etc import anonymize_email, linear_as_int_grid
 
 import random as r
 from dataclasses import dataclass
@@ -42,12 +43,24 @@ class Player(db.Model):
     name: str = db.Column(db.String, default = 'Player', nullable = False, unique = True)
     email: str = db.Column(db.String, nullable = True, unique = True)
     password: str = db.Column(db.String, nullable = False)
+    score: int = db.Column(db.Integer, default = 0, nullable = False)
 
     # FOREIGN KEY
     game_id: str = db.Column(db.String, db.ForeignKey('games.id'), nullable = True)
     
     # RELATIONSHIPS
     trophies = db.relationship('Trophy', secondary = player_trophies, backref = 'players')
+
+    def json_repr(self) -> dict:
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'anonymized_email': anonymize_email(self.email),
+            'score': self.score,
+            'trophies': self.trophies,
+            'current_game': self.game_id
+        }
 
 @dataclass
 class Game(db.Model):
@@ -56,7 +69,15 @@ class Game(db.Model):
 
     id: str = db.Column(db.String(7), default = game_uid, primary_key = True)
     matrix: str = db.Column(db.String(47), default = LINEAR_BASE_GRID, nullable = False)
-    turn: int = db.Column(db.String(10), nullable = True)
+    turn: int = db.Column(db.Integer, default = 1, nullable = False)
 
     # RELATIONSHIP
     players: List[Player] = db.relationship('Player', backref = 'game', lazy = True)
+
+    def json_repr(self) -> dict:
+        return {
+            'id': self.id,
+            'matrix': linear_as_int_grid(self.matrix),
+            'turn': self.turn,
+            'players': self.players
+        }
