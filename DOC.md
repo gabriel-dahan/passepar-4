@@ -2,12 +2,12 @@
 
 ## Endpoints
 
-### - **`/api/game`**
+### Games
 
-- `/new` : [`POST`] Creates a new game record in the database.
-- `/list?onlyids=True` : [`GET`] Returns the list of all currently active games.
-- `/<gamekey>` : [`GET`] Returns informations about a given game.
-- `/<gamekey>/addplayer` : [`POST`] Adds a player with given `player_id` in a game if it isn't full.
+- `/api/game/new` : [`POST`] Creates a new game record in the database.
+- `/api/game/list?onlyids=True` : [`GET`] Returns the list of all currently active games.
+- `/api/game/<gamekey>` : [`GET`] Returns informations about a given game.
+- `/api/game/<gamekey>/addplayer` : [`POST`] Adds a player with given `player_id` in a game if it isn't full.
     
     - `player_id` : string
 
@@ -26,16 +26,16 @@
 > - `G5` : Player is already in a game.
 > - `G6` : The choosen column isn't valid.
 
-### - **`/api/players`**
+### Players
 
-- `/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
+- `/api/players/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
 
     - `name` : string
     - `email` : string
     - `password` : string
 
-- `/<playerid>` : [`GET`] Returns informations about a given player.
-- `/<playerid>/update` : [`PUT`] Updates a player's informations.
+- `/api/players/<playerid>` : [`GET`] Returns informations about a given player.
+- `/api/players/<playerid>/update` : [`PUT`] Updates a player's informations.
 
 > **Error codes** : 
 >
