@@ -24,22 +24,22 @@
 > - `G3` : No space left on the choosen column.
 > - `G4` : Requested player doesn't exist.
 > - `G5` : Player is already in a game.
-> - `G6` : The choosen column isn't valid.
+> - `G6` : The choosen column is invalid.
 
 ### Players
 
-- `/api/players/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
+- `/api/player/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
 
     - `name` : string
     - `email` : string
     - `password` : string
 
-- `/api/players/<playerid>` : [`GET`] Returns informations about a given player.
-- `/api/players/<playerid>/update` : [`PUT`] Updates a player's informations.
+- `/api/player/<playerid>` : [`GET`] Returns informations about a given player.
+- `/api/player/<playerid>/update` : [`PUT`] Updates a player's informations.
 
 > **Error codes** : 
 >
-> - `P1-1` or `P1-2` : Player's email (`1`) or name (`2`) already exists in the database.
-> - `P2` : ...
-> - `P3` : ...
-> - `P4` : ...
+> - `P1` : Player's email (`1`) or name (`2`) already exists in the database.
+> - `P2` : Player with given id or email doesn't exist.
+> - `P3` : Email entered is not valid (for registration).
+> - `P4` : Login failed (incorrect password).
