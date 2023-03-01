@@ -20,4 +20,4 @@ DB_URI=sqlite:///site.db
 SECRET=...
 ```
 
-API Endpoints & error codes : [here](./DOC.md)
+API Endpoints & error codes : [here](./api/README.md)
