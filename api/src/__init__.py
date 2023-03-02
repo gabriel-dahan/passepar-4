@@ -18,10 +18,11 @@ cors = CORS(app, resources = {r'/api/*': {'origins': '*'}})
 app.url_map.strict_slashes = False
 
 app.config['SECRET'] = CONF['SECRET']
+app.config['BUNDLE_ERRORS'] = True
 
 # --- DATABASE --- #
 app.config['SQLALCHEMY_DATABASE_URI'] = CONF['DB_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from src.resources import games, players
+from src.resources import main, games, players

@@ -28,18 +28,25 @@
 
 ### Players
 
+- `/api/player/login`: [`POST`] Logins a player using its `email` and `password`.
+
+    - `email`: string
+    - `password`: string
+
 - `/api/player/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
 
     - `name` : string
     - `email` : string
     - `password` : string
 
+- `/api/player/search?name=...&email=...&limit=10` : [`GET`] Returns all users maching a specific `name` (default: '') or `email` (default: '') with a `limit` of 10 users by default (max: 100).
 - `/api/player/<playerid>` : [`GET`] Returns informations about a given player.
 - `/api/player/<playerid>/update` : [`PUT`] Updates a player's informations.
 
     - `name`: string (optional)
     - `email` : string (optional)
     - `password` : string (optional)
+    - `score`: integer (optional)
 
 > **Error codes** : 
 >
@@ -47,3 +54,4 @@
 > - `P2` : Player with given id or email doesn't exist.
 > - `P3` : Email entered is not valid (for registration).
 > - `P4` : Login failed (incorrect password).
+> - `P5` : Player search limit cannot be greater than 100.

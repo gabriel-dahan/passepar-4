@@ -1,6 +1,7 @@
 from flask import jsonify, Response
 from flask_restful import Resource, request, reqparse
 
+from . import API_ROOT
 from .. import api, db
 from ..models import Game, Player
 from ..core import GameCore

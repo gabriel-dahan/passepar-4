@@ -1,11 +1,14 @@
 from flask import jsonify, Response
-from flask_restful import Resource, request, reqparse
+from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
 from email_validator import validate_email, EmailNotValidError
 
+from . import API_ROOT
 from .. import api, db
 from ..models import Player
-from ..etc import anonymize_email, generate_avatar_url
+from ..etc import generate_avatar_url
+
+from typing import List
 
 # --- PLAYERS API --- #
 
@@ -39,6 +42,27 @@ class PlayerUpdate(Resource):
             'message': f'Player \'{player.id}\' was successfuly updated.'
         })
 
+class SearchPlayer(Resource):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('name', type = str, default = '', location = 'args')
+        self.parser.add_argument('email', type = str, default = '', location = 'args')
+        self.parser.add_argument('limit', type = int, default = 10, location = 'args')
+
+    def get(self) -> Response:
+        args = self.parser.parse_args()
+        if args['limit'] > 100:
+            return jsonify({
+                'code': 'P5',
+                'message': 'Player search limit cannot be greater than 100.'
+            })
+        matches: List[Player] = Player.query.filter(
+            (Player.name.like(f"%{args['name']}%")) | (Player.email.like(f"%{args['email']}%"))
+        ).limit(args['limit']).all()
+        return jsonify({'players': [player.json_repr() for player in matches]})
+    
 class PlayerInfo(Resource):
 
     def get(self, playerid: str) -> Response:
@@ -48,12 +72,7 @@ class PlayerInfo(Resource):
                 'code': 'P2',
                 'message': f'Player with id \'{playerid}\' doesn\'t exist.'
             })
-        return jsonify({
-            'id': p.id,
-            'name': p.name,
-            'email': p.email,
-            'anonymized_email': anonymize_email(p.email)
-        })
+        return jsonify(p.json_repr())
 
 class LoginPlayer(Resource):
 
@@ -129,12 +148,14 @@ class RegisterPlayer(Resource):
         db.session.commit()
 
         return jsonify({
+            'player_id': p.id,
             'message': f'Player \'{p.id}\' was successfuly registered.'
         })
 
 # -- RESOURCES -- #
-root = '/api/player'
+root = f'{API_ROOT}/player'
 api.add_resource(PlayerUpdate, f'{root}/<string:playerid>/update')
 api.add_resource(PlayerInfo, f'{root}/<string:playerid>/')
 api.add_resource(LoginPlayer, f'{root}/login')
 api.add_resource(RegisterPlayer, f'{root}/register')
+api.add_resource(SearchPlayer, f'{root}/search')
