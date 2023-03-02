@@ -39,7 +39,8 @@ class PlayerUpdate(Resource):
             setattr(player, key, val)
         db.session.commit()
         return jsonify({
-            'message': f'Player \'{player.id}\' was successfuly updated.'
+            'message': f'Player \'{player.id}\' was successfuly updated.',
+            'player': player.json_repr()
         })
 
 class SearchPlayer(Resource):
@@ -100,7 +101,8 @@ class LoginPlayer(Resource):
         # --> Cookie storing TODO
 
         return jsonify({
-            'message': f'Player \'{player.id}\' was successfuly logged in.'
+            'message': f'Player \'{player.id}\' was successfuly logged in.',
+            'player': player.json_repr()
         })
 
 class RegisterPlayer(Resource):
@@ -131,12 +133,12 @@ class RegisterPlayer(Resource):
                 return jsonify({
                     'code': 'P1',
                     'subcode': '1',
-                    'message': 'Player\'s email is already registered.'
+                    'message': 'This email already exists in the database.'
                 })
             return jsonify({
                 'code': 'P1',
                 'subcode': '2',
-                'message': 'Player\'s name already exists.'
+                'message': 'This name is already taken.'
             })
         p = Player(
             name = name,
@@ -148,8 +150,8 @@ class RegisterPlayer(Resource):
         db.session.commit()
 
         return jsonify({
-            'player_id': p.id,
-            'message': f'Player \'{p.id}\' was successfuly registered.'
+            'message': f'Player \'{p.id}\' was successfully registered.',
+            'player': p.json_repr()
         })
 
 # -- RESOURCES -- #
