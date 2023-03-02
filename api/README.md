@@ -11,7 +11,7 @@
     
     - `player_id` : string
 
-- `/api/game/<gamekey>/update` : [`PUT`] Adds a pawn in the given `column` if not full.
+- `/api/game/<gamekey>/play` : [`PUT`] Adds a pawn in the given `column` if not full.
 
     - `column` : integer
 
