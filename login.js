@@ -16,7 +16,6 @@ function postdata(url, obj) {
     fetch(url + obj, {
             method: "POST",
             headers: {
-                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json'
 
             },
