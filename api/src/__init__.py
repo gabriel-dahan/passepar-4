@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
+from flask_cors import CORS
 from dotenv import dotenv_values
 
 CONF = dotenv_values('.env')
@@ -12,6 +13,7 @@ app = Flask(
     template_folder='templates'
 )
 api = Api(app)
+cors = CORS(app, resources = {r'/api/*': {'origins': '*'}})
 
 app.url_map.strict_slashes = False
 
