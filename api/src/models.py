@@ -1,15 +1,8 @@
 from . import db
-from .etc import anonymize_email, linear_as_int_grid
+from .etc import anonymize_email, linear_as_int_grid, rand_uid
 
-import random as r
 from dataclasses import dataclass
 from typing import List
-
-def rand_uid(length: int = 7) -> str:
-    """ Generates a unique id with given length. """
-    alph = [chr(ordinal) for ordinal in range(97, 123)]
-    num = '0123456789'
-    return ''.join(r.choice(alph + list(num)) for _ in range(length))
 
 def game_uid() -> str:
     generated = rand_uid()

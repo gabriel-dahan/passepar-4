@@ -1,5 +1,12 @@
 from typing import List
 from libgravatar import Gravatar
+import random as r
+
+def rand_uid(length: int = 7) -> str:
+    """ Generates a unique id with given length. """
+    alph = [chr(ordinal) for ordinal in range(97, 123)]
+    num = '0123456789'
+    return ''.join(r.choice(alph + list(num)) for _ in range(length))
 
 def linear_as_int_grid(linear_grid: str) -> List[List[int]]:
     return [[int(elem) for elem in line] for line in linear_grid.split('-')]
