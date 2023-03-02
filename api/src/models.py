@@ -56,6 +56,7 @@ class Player(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'avatar_url': self.avatar_url,
             'email': self.email,
             'anonymized_email': anonymize_email(self.email),
             'score': self.score,
