@@ -5,7 +5,7 @@ from email_validator import validate_email, EmailNotValidError
 
 from .. import api, db
 from ..models import Player
-from ..etc import anonymize_email
+from ..etc import anonymize_email, generate_avatar_url
 
 # --- PLAYERS API --- #
 
@@ -122,6 +122,7 @@ class RegisterPlayer(Resource):
         p = Player(
             name = name,
             email = email,
+            avatar_url = generate_avatar_url(email),
             password = generate_password_hash(password)
         )
         db.session.add(p)

@@ -42,6 +42,7 @@ class Player(db.Model):
     id: int = db.Column(db.String(10), default = player_uid, primary_key = True)
     name: str = db.Column(db.String, default = 'Player', nullable = False, unique = True)
     email: str = db.Column(db.String, nullable = True, unique = True)
+    avatar_url: str = db.Column(db.String, nullable = False)
     password: str = db.Column(db.String, nullable = False)
     score: int = db.Column(db.Integer, default = 0, nullable = False)
 
