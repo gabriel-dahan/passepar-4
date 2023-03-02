@@ -1,29 +1,18 @@
+console.log("linked");
+
+
 function submitData(objButton) {
-    url = '/api/players/register'
+
+    const formData = new FormData()
+    url = 'http://51.83.73.242:1102/api/players/register'
     nom = document.getElementById('name1').value;
     email = document.getElementById('email1').value;
-    msg = document.getElementById('msg1').value;
-    console.log(nom, email, msg)
-    data = nom, email, msg
-    postdata(url, data)
-}
-
-
-
-
-
-function postdata(url, obj) {
-    fetch(url + obj, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-
-            },
-        }).then((response) => response.json())
-        .then((data) => {
-            console.log(data)
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    psd = document.getElementById('msg1').value;
+    formData.append("username" = nom);
+    formData.append("email" = email);
+    formData.append("password" = psd);
+    console.log(formData);
+    const request = new XMLHttpRequest();
+    request.open("POST", url);
+    request.send(formData);
 }
