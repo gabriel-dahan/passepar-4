@@ -76,11 +76,64 @@ class Players {
 }
 
 class Games {
+
     constructor() {
         this.endpoint = API_BASE + '/game';
     }
 
-    // TODO
+    new() {
+        return fetch(`${this.endpoint}/new`, {
+            method: "POST"
+        }).then((res) => res.json());
+    }
+
+    list(onlyIds = false) {
+        onlyIds = 'True' ? onlyIds : 'False';
+        return fetch(`${this.endpoint}/list?onlyids=${onlyIds}`, {
+            method: "GET",
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+        }).then((res) => res.json());
+    }
+
+    get(gameKey) {
+        return fetch(`${this.endpoint}/${gameKey}`, {
+            method: "GET",
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+        }).then((res) => res.json());
+    }
+
+    addplayer(gameKey, playerId) {
+        let payload = { 
+            player_id: playerId
+        };
+
+        return fetch(`${this.endpoint}/${gameKey}/addplayer`, {
+            method: "POST",
+            body: __format_data(payload)
+        }).then((res) => res.json());
+    }
+
+    play(gameKey, column) {
+        let payload = { 
+            column: column
+        };
+
+        return fetch(`${this.endpoint}/${gameKey}/play`, {
+            method: "PUT",
+            body: __format_data(payload)
+        }).then((res) => res.json());
+    }
+
+    delete(gameKey) {
+        return fetch(`${this.endpoint}/${gameKey}/delete`, {
+            method: "DELETE",
+            body: __format_data(payload)
+        }).then((res) => res.json());
+    }
 }
 
 const Connect4API = {
@@ -88,5 +141,5 @@ const Connect4API = {
     'games': new Games()
 }
 
-Connect4API.players.register(name_ = 'C3PO', email = 'c3po@starwars.com', password = '1234')
-    .then((data) => console.log(data));
+// Connect4API.players.register(name_ = 'TestUser', email = 'test@user.com', password = '1234')
+//     .then((data) => console.log(data));
