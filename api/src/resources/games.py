@@ -83,7 +83,7 @@ class GameChange(Resource):
 class GameDeletion(Resource):
 
     def delete(self, gamekey: str):
-        game = Game.query.filter_by(id = gamekey).first()
+        game: Game = Game.query.filter_by(id = gamekey).first()
         if not game:
             return jsonify({
                 'code': 'G2',
@@ -92,24 +92,20 @@ class GameDeletion(Resource):
         db.session.delete(game)
         db.session.commit()
         return jsonify({
-            'message': f'The game with id \'{gamekey}\' was successfuly deleted.'
+            'message': f'The game with id \'{gamekey}\' was successfuly deleted.',
+            'game': game.json_repr()
         })
 
 class GameInfo(Resource):
 
     def get(self, gamekey: str):
-        game = Game.query.filter_by(id = gamekey).first()
+        game: Game = Game.query.filter_by(id = gamekey).first()
         if not game:
             return jsonify({
                 'code': 'G2',
                 'message': f'Game with id \'{gamekey}\' does not exist.'
             })
-        return jsonify({
-            'id': game.id,
-            'matrix': linear_as_int_grid(game.matrix),
-            'players': game.players,
-            'turn': game.turn
-        })
+        return jsonify(game.json_repr())
 
 class GamesList(Resource):
     
@@ -123,7 +119,7 @@ class GamesList(Resource):
             })
         return jsonify({
             'games': 
-                [{'id': g.id, 'matrix': linear_as_int_grid(g.matrix)} for g in Game.query.all()]
+                [g.json_repr() for g in Game.query.all()]
         })
 
 class NewGame(Resource):
@@ -133,8 +129,8 @@ class NewGame(Resource):
         db.session.add(new_game)
         db.session.commit()
         return jsonify({
-            'game_id': new_game.id,
-            'message': f'Game \'{new_game.id}\' was successfuly created.'
+            'message': f'Game \'{new_game.id}\' was successfuly created.',
+            'game': new_game.json_repr()
         })
 
 # -- RESOURCES -- #
