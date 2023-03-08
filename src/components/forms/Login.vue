@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import Form from './Form.vue'
 </script>
+
 <template>
-    <main>
-        <h1>P4</h1>
-        <form>
-            <input type="text">
-            <input type="text">
-            <input type="text">
-        </form>
-    </main>
+    <h1>P4</h1>
+    <Form>
+        <input type="text">
+        <input type="text">
+        <input type="text">
+    </Form>
 </template>
 
 
