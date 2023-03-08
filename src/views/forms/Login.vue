@@ -17,10 +17,3 @@ import Form from '@/components/Form.vue'
         <input id="confirm-password" type="password"> <br>
     </Form>
 </template>
-
-
-<style scoped>
-@media (min-width: 1024px) {
-    /* ... */
-}
-</style>
