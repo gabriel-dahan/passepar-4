@@ -2,14 +2,14 @@ const HOST = '127.0.0.1';
 const PORT = 5000
 const API_BASE = `http://${HOST}:${PORT}/api`;
 
-const __formatData = (payload) => {
+const __formatData = (payload: any) => {
     let formData = new FormData();
     for (const [key, value] of Object.entries(payload))
-        formData.append(key, value);
+        formData.append(key, value as any);
     return formData
 }
 
-const __get = (endpoint) => {
+const __get = (endpoint: string) => {
     return fetch(endpoint, {
         method: "GET",
         headers: {
@@ -18,23 +18,25 @@ const __get = (endpoint) => {
     });
 }
 
-const __post = (endpoint, payload = null, method = 'POST') => {
+const __post = (endpoint: string, payload = {}, method = 'POST') => {
     return fetch(endpoint, {
         method: method,
-        body: payload ? __formatData(payload) : payload
+        body: __formatData(payload)
     });
 }
 
-const __put = (endpoint, payload = null) => __post(endpoint, payload, 'PUT');
+const __put = (endpoint: string, payload = {}) => __post(endpoint, payload, 'PUT');
 
-const __delete = (endpoint, payload = null) => __post(endpoint, payload, 'DELETE');
+const __delete = (endpoint:string, payload = {}) => __post(endpoint, payload, 'DELETE');
 
 class Players {
+    endpoint: string;
+
     constructor() {
         this.endpoint = API_BASE + '/player';
     }
 
-    async register(name_, email, password) {
+    async register(name_: string, email: string, password: string) {
         return __post(`${this.endpoint}/register`, {
             name: name_,
             email: email,
@@ -42,7 +44,7 @@ class Players {
         }).then(res => res.json());
     }
 
-    async login(email, password) {
+    async login(email: string, password: string) {
         return __post(`${this.endpoint}/login`, {
             email: email,
             password: password
@@ -55,12 +57,12 @@ class Players {
             .then(res => res.json());
     }
 
-    async get(id) {
+    async get(id: string) {
         return __get(`${this.endpoint}/${id}`)
             .then(res => res.json());
     }
 
-    async update(id, name_ = null, email = null, password = null, score = null) {
+    async update(id: string, name_ = null, email = null, password = null, score = null) {
         return __put(`${this.endpoint}/${id}/update`, { 
             name: name_,
             email: email,
@@ -72,6 +74,7 @@ class Players {
 }
 
 class Games {
+    endpoint: string;
 
     constructor() {
         this.endpoint = API_BASE + '/game';
@@ -83,29 +86,29 @@ class Games {
     }
 
     async list(onlyIds = false) {
-        onlyIds = 'True' ? onlyIds : 'False';
-        return __get(`${this.endpoint}/list?onlyids=${onlyIds}`)
+        let onlyIdsStr = 'True' ? onlyIds : 'False';
+        return __get(`${this.endpoint}/list?onlyids=${onlyIdsStr}`)
             .then(res => res.json());
     }
 
-    async get(gameKey) {
+    async get(gameKey: string) {
         return __get(`${this.endpoint}/${gameKey}`)
             .then(res => res.json());
     }
 
-    async addplayer(gameKey, playerId) {
+    async addplayer(gameKey: string, playerId: string) {
         return __post(`${this.endpoint}/${gameKey}/addplayer`, { 
             player_id: playerId
         }).then(res => res.json());
     }
 
-    async play(gameKey, column) {
+    async play(gameKey: string, column: string) {
         return __put(`${this.endpoint}/${gameKey}/play`, { 
             column: column
         }).then(res => res.json());
     }
 
-    async delete(gameKey) {
+    async delete(gameKey: string) {
         return __delete(`${this.endpoint}/${gameKey}/delete`)
             .then(res => res.json());
     }
@@ -116,3 +119,4 @@ const Connect4API = {
     'games': new Games()
 }
 
+export { Connect4API };
