@@ -1,0 +1,19 @@
+{
+  "name": "connect4-vuejs",
+  "version": "1.0.0",
+  "description": "Connect4 FRONTEND",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabriel-dahan/connect4-game.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gabriel-dahan/connect4-game/issues"
+  },
+  "homepage": "https://github.com/gabriel-dahan/connect4-game#readme"
+}
