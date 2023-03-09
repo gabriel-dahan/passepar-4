@@ -1,20 +1,19 @@
-import HomeVue from '@/views/Home.vue'
-import LoginVue from '@/views/forms/Login.vue'
-
 import { createRouter, createWebHistory } from 'vue-router'
 
-const router = createRouter({
+import HomeVue from '@/views/Home.vue'
+
+import userRoutes from './users'
+import gameRoutes from './games'
+
+export default createRouter({
     history: createWebHistory(),
     routes: [
         {
             path: '/',
             component: HomeVue
         },
-        {
-            path: '/login',
-            component: LoginVue
-        }
-    ]
-})
-
-export default router;
+    ].concat(
+        userRoutes, 
+        gameRoutes
+    )
+});

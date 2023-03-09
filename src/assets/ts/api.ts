@@ -1,5 +1,5 @@
-const HOST = '127.0.0.1';
-const PORT = 5000
+const HOST = '51.83.73.242';
+const PORT = 1102;
 const API_BASE = `http://${HOST}:${PORT}/api`;
 
 const __formatData = (payload: any) => {
@@ -86,7 +86,7 @@ class Games {
     }
 
     async list(onlyIds = false) {
-        let onlyIdsStr = 'True' ? onlyIds : 'False';
+        let onlyIdsStr = onlyIds ? 'true' : 'false';
         return __get(`${this.endpoint}/list?onlyids=${onlyIdsStr}`)
             .then(res => res.json());
     }

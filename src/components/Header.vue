@@ -3,6 +3,7 @@
 
 <template>
     <header>
+        <h1>PassPar4</h1>
         <nav>
             <ul>
                 <li>
@@ -24,6 +25,12 @@
 header {
     background-color: var(--color-background-soft);
     padding: 1rem;
+    display: flex;
+    gap: 20px;
+}
+
+header > h1 {
+    font-size: 17px;
 }
 
 header > nav > ul {
