@@ -1,7 +1,6 @@
 from flask import jsonify, Response
 from flask_restful import Resource, request, reqparse
 
-from . import API_ROOT
 from .. import api, db
 from ..models import Game, Player
 from ..core import GameCore
@@ -111,8 +110,8 @@ class GamesList(Resource):
     
     def get(self):
         args = request.args
-        __only_ids = args.get('onlyids')
-        only_ids = __only_ids == 'True' or not __only_ids
+        __only_ids = args.get('onlyids').lower()
+        only_ids = __only_ids == 'true' or not __only_ids
         if only_ids:
             return jsonify({
                 'games': [g.id for g in Game.query.all()]
