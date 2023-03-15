@@ -1,5 +1,11 @@
+/* fonts*/
+
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+
+/*balises*/
+
 h1 {
     font-family: 'Press Start 2P', cursive;
     color: #39F63B;
@@ -12,12 +18,17 @@ h1 {
   
 }
 
-
+.flex-container{
+  flex-direction: column;
+  align-items: center;
+}
 
 h2{
+  position : relative;
+  left: 43%;
+  margin-top: 6rem;
   color: #39F63B;
   font-family: 'Share Tech Mono', cursive;
-  margin: 2rem 1rem;
 	width: 23ch;
   overflow: hidden;
 	white-space: nowrap;
@@ -25,25 +36,14 @@ h2{
              type 5s steps(23, end);
 }
 
-@keyframes type {
-  0% {
-    width: 0;
-  }
-
-
-}
-
-
-
-
 body {
     background-color:#1D1D1D;
   }
 
 form {
-  position :absolute;
-  left : 255px;
-  top : 135px;
+  position :relative;
+  left : 44.5%;
+  top : 40%;
 }
 
 input[type=text]{
@@ -55,6 +55,32 @@ input[type=text]{
   animation-duration: 14s ;
 }
 
+
+button{
+  position: relative;
+  left: 43%;
+  margin-top: 3rem;
+  padding :10px 20px;
+  border-radius: 8px;
+  border-style: solid;
+  border-color: #39F63B;
+  background-color: #39F63B;
+  font-family: 'Share Tech Mono';
+  animation-name: appearbutton;
+  animation-duration: 4.1s;
+  transition-duration: 0.4s;
+}
+
+button:hover{
+  background-color: #1D1D1D;
+  border-color: #39F63B;
+  color:#39F63B;
+}
+
+
+
+/* animations */
+
 @keyframes appear {
   0%{
     border-style: hidden;
@@ -64,11 +90,31 @@ input[type=text]{
   }
 }
 
-
-
+@keyframes appearbutton{
+  0%{
+    background-color: #1D1D1D;
+    border-color:#1D1D1D;
+    color:#1D1D1D
+  }
+  98%{
+    background-color: #1D1D1D;
+    border-color:#1D1D1D;
+    color:#1D1D1D
+  }
+  99%{
+    background-color: #39F63B;
+    border-color:#39F63B;
+  }
+}
 
 @keyframes clignoter {
  0%   { opacity:1; }
  40%   {opacity:0; }
  100% { opacity:1; }
+}
+
+@keyframes type {
+  0% {
+    width: 0;
+  }
 }

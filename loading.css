@@ -1,0 +1,45 @@
+/* fonts*/
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+
+/*balises*/
+
+h1 {
+    font-family: 'Press Start 2P', cursive;
+    color: #39F63B;
+    text-align: center;
+    margin-top: 4rem;
+}
+
+
+.chargement{
+    position : relative;
+    left: 43%;
+    margin-top:10rem;
+    color: #39F63B;
+    font-family: 'Share Tech Mono', cursive;
+      width: 23ch;
+    overflow: hidden;
+      white-space: nowrap;
+      animation: type 2.5s steps(23, end);
+      animation-iteration-count: infinite;
+  }
+
+body{
+    background-color: #1d1d1d;
+}
+
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes type {
+    0% {
+      width: 0;
+    }
+  }
+
