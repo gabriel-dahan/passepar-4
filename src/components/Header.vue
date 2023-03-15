@@ -15,6 +15,9 @@
                 <li>
                     <router-link to="/register">Register</router-link>
                 </li>
+                <li>
+                    <router-link to="/game/4q04h92">Example Game</router-link>
+                </li>
             </ul>
         </nav>
     </header>
