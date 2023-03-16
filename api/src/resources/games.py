@@ -110,8 +110,8 @@ class GamesList(Resource):
     
     def get(self):
         args = request.args
-        __only_ids = args.get('onlyids').lower()
-        only_ids = __only_ids == 'true' or not __only_ids
+        __only_ids = args.get('onlyids')
+        only_ids = __only_ids.lower() == 'true' if __only_ids else False
         if only_ids:
             return jsonify({
                 'games': [g.id for g in Game.query.all()]

@@ -3,4 +3,6 @@
 instance/
 __pycache__/
 
+.frontend/connect4-game/
+
 .design/
