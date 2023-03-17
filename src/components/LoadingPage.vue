@@ -23,6 +23,8 @@ onMounted(() => {
     height: 100%;
 }
 .page-load > h1 {
+    position: relative;
     left: 50%;
+    top: 50%;
 }
 </style>

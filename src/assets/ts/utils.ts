@@ -1,3 +1,5 @@
+const APP_NAME = 'PASSEPAR-4'
+
 const matrixAsColumns = (matrix: any[][]) => {
     let newMatrix = [];
     for (let j = 0; j < 7; j++) {
@@ -10,4 +12,4 @@ const matrixAsColumns = (matrix: any[][]) => {
     return newMatrix
 };
 
-export { matrixAsColumns, };
+export { matrixAsColumns, APP_NAME };

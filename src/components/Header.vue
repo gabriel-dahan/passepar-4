@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { APP_NAME } from '@/assets/ts/utils';
 </script>
 
 <template>
     <header>
-        <h1>PassPar4</h1>
+        <h1>{{ APP_NAME }}</h1>
         <nav>
             <ul>
                 <li>
