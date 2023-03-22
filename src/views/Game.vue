@@ -10,24 +10,34 @@ const route = useRoute();
 const id = route.params.id as string;
 
 const data = ref({
-    'id': null,
-    'matrix': [],
-    'players': []
+    'game': {
+        'id': null,
+        'matrix': [],
+        'players': [],
+        'public': false
+    },
+    'current_user': {
+        'is_connected': false
+    }
 });
 
-const loadGame = () => {
+const loadGameData = () => {
     Connect4API.games.get(id)
         .then(res => {
             res.matrix = matrixAsColumns(res.matrix);
-            data.value = res;
+            data.value.game = res;
         }) // Store returned data to the 'data' variable.
         .catch(error => console.error(error));
+}
+
+const loadUserData = () => {
+    // Load current user's data if it's connected.
 }
     
 const play = (event: any, column: number) => {
     Connect4API.games.play(id, String(column))
         .then(data => {
-            loadGame(); // Reloads the game's data.
+            loadGameData(); // Reloads the game's data.
 
             if(data.code && data.code === 'G3') {
                 alert(`Column ${column + 1} is full.`) // Testing purposes.
@@ -37,26 +47,36 @@ const play = (event: any, column: number) => {
 };
 
 onBeforeMount(() => {
-    loadGame()
+    loadGameData()
 });
 </script>
 
 <template>
-    <div class="pre-game" v-if="data.id && data.players.length < 2">
-        <h1 class="game-title">Partie #{{ data.id }}</h1>
-        <p class="players-count">Joueurs : {{ data.players.length }}/2</p>
-        <p>Choisissez la pilule de votre choix...</p>
-        <div class="pill-choice">
-            <img src="@/assets/choices_left.png" alt="Red Pill">
-            <img src="@/assets/choices_right.png" alt="Blue Pill">
+    <!-- PRE-GAME SCREEN -->
+    <div class="pre-game" v-if="data.game.id && data.game.players.length < 2">
+        <p class="privacy public" v-if="data.game.public">Partie publique</p>
+        <p class="privacy private" v-else>Partie privée</p>
+        <div class="main-content">
+            <h1 class="game-title">Partie #{{ data.game.id }}</h1>
+            <p class="players-count">Joueurs : {{ data.game.players.length }}/2</p>
+            <p>Choisissez la pilule de votre choix...</p>
+            <div class="pill-choice">
+                <img src="@/assets/choices_left.png" alt="Red Pill">
+                <img src="@/assets/choices_right.png" alt="Blue Pill">
+            </div>
         </div>
+        <p class="connected-as" v-if="!data.current_user.is_connected">
+            Vous jouez en tant qu'invité.
+        </p>
     </div>
-    <div class="game" v-else-if="data.id && data.players.length === 2">
+
+    <!-- STARTED GAME -->
+    <div class="game" v-else-if="data.game.id && data.game.players.length === 2">
         <div id="grid">
             <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
-            <div :class="'column-' + (index - 1)" @click="$event => play($event, index - 1)" v-for="index in data.matrix.length">
+            <div :class="'column-' + (index - 1)" @click="$event => play($event, index - 1)" v-for="index in data.game.matrix.length">
                 <div class="cells">
-                    <div class="cell" v-for="cell in data.matrix[index - 1]">
+                    <div class="cell" v-for="cell in data.game.matrix[index - 1]">
                         <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == '1'">
                         <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == '2'">
                         <img src="@/assets/void.svg" alt="NP" v-else>
@@ -71,6 +91,7 @@ onBeforeMount(() => {
 
 <style scoped>
 .pre-game,
+.pre-game > .main-content,
 .game {
     width: 100%;
     height: 100%;
@@ -80,29 +101,48 @@ onBeforeMount(() => {
     justify-content: center;
 }
 
-.pre-game > .game-title {
+.pre-game p {
+    font-family: 'Share Tech Mono', cursive;
+}
+
+.pre-game > .privacy {
+    color: var(--color-text);
+    padding: 0 7px;
+    border-radius: 10px;
+}
+
+.pre-game > .privacy.public {
+    border: 1px solid #297373;
+}
+
+.pre-game > .privacy.private {
+    border: 1px solid #EE2E31;
+}
+
+.pre-game > .main-content > .game-title {
     font-family: 'Share Tech Mono', cursive;
     color: var(--matrix-text);
 }
 
-.pre-game > p {
-    font-family: 'Share Tech Mono', cursive;
-}
-
-.pre-game > .pill-choice {
+.pre-game > .main-content > .pill-choice {
     display: flex;
     justify-content: center;
     gap: 100px;
 }
 
-.pre-game > .pill-choice > img {
+.pre-game > .main-content > .pill-choice > img {
     height: 150px;
     width: auto;
     transition: transform 0.3s ease-out;
 }
 
-.pre-game > .pill-choice > img:hover {
+.pre-game > .main-content > .pill-choice > img:hover {
     transform: scale(1.2);
+}
+
+.pre-game > .connected-as {
+    color: var(--color-small-text);
+    font-size: 14px;
 }
 
 .game > #grid {

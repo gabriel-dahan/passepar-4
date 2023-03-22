@@ -1,9 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, type ComponentPublicInstance } from 'vue';
 
 import { APP_NAME } from '@/assets/ts/utils';
+import { Connect4API } from '@/assets/ts/api';
 
 let gameId = ref('');
+
+let G2 = ref(false);
+
+const getGame = (vm: ComponentPublicInstance) => {
+    const gId = gameId.value;
+    Connect4API.games.get(gId).then(data => {
+        if (data.code !== 'G2')
+            vm.$router.push({ name: 'game', params: { gId } });
+        else
+            G2.value = true;
+    });
+}
 </script>
 
 <template>
@@ -11,8 +24,9 @@ let gameId = ref('');
     <div class="content">
         <h2>Entrez le code :</h2>
         <input v-model="gameId" placeholder="ex. : 4q04h92">
+        <p v-if="G2">Game with ID '{{ gameId }}' doesn't exist :(</p>
         <div class="btns">
-            <button type="submit" @click="$event => this.$router.push(`/game/${gameId}`)">Go !</button>
+            <button type="submit" @click="$event => getGame">Go !</button>
             <button type="button">login/sign up</button>
         </div>
     </div>
@@ -38,6 +52,21 @@ h1 {
     gap: 15px;
 }
 
+.content > input {
+    outline: none;
+    padding: 5px;
+    border: 1px var(--matrix-text) solid;
+    border-radius: 5px;
+    font-family: 'Share Tech Mono', cursive;
+    color: var(--text-color);
+    background-color: rgb(31, 31, 31);
+}
+
+.content > ::placeholder {
+    font-family: 'Share Tech Mono', cursive;
+    color: var(--text-color);
+}
+
 .content > h2 {
     color: var(--matrix-text);
     font-family: 'Share Tech Mono', cursive;
@@ -51,7 +80,7 @@ h1 {
     background-color: var(--color-background);
     opacity: 0;
     color: var(--matrix-text);
-    font-family: 'Share Tech Mono';
+    font-family: 'Share Tech Mono', cursive;
     outline: none;
 }
 

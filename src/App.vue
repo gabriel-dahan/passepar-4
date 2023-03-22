@@ -13,5 +13,5 @@ import Cursor from './components/Cursor.vue';
     <main>
         <router-view />
     </main>
-    <Footer></Footer>
+    <!-- <Footer></Footer> -->
 </template>
