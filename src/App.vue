@@ -6,6 +6,13 @@ import LoadingPage from './components/LoadingPage.vue';
 import Cursor from './components/Cursor.vue';
 </script>
 
+<script lang="ts">
+const inputs = document.getElementsByTagName('input');
+Array.from(inputs).forEach(input => {
+    input.setAttribute('spellcheck', 'false');
+});
+</script>
+
 <template>
     <LoadingPage></LoadingPage>
     <Cursor></Cursor>

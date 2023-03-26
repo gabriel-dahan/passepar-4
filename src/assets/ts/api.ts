@@ -1,5 +1,5 @@
-const HOST = '51.83.73.242';
-const PORT = 1102;
+const HOST = '127.0.0.1' //'51.83.73.242';
+const PORT = 5000 //1102;
 const API_BASE = `http://${HOST}:${PORT}/api`;
 
 const __formatData = (payload: any) => {
@@ -80,14 +80,15 @@ class Games {
         this.endpoint = API_BASE + '/game';
     }
 
-    async new() {
-        return __post(`${this.endpoint}/new`)
-            .then(res => res.json());
+    async new(privacy: boolean) {
+        return __post(`${this.endpoint}/new`, {
+            public: privacy
+        }).then(res => res.json());
     }
 
-    async list(onlyIds = false) {
+    async list(onlyIds = false, onlyPublic = false) {
         let onlyIdsStr = onlyIds ? 'true' : 'false';
-        return __get(`${this.endpoint}/list?onlyids=${onlyIdsStr}`)
+        return __get(`${this.endpoint}/list?only_ids=${onlyIdsStr}&only_public=${onlyPublic}`)
             .then(res => res.json());
     }
 

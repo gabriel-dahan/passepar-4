@@ -4,18 +4,14 @@ import { useRoute } from 'vue-router';
 
 import { Connect4API } from '@/assets/ts/api';
 import { matrixAsColumns } from '@/assets/ts/utils';
-import LoadingPage from '@/components/LoadingPage.vue';
+
+import type { Game } from '@/assets/ts/interfaces';
 
 const route = useRoute();
 const id = route.params.id as string;
 
 const data = ref({
-    'game': {
-        'id': null,
-        'matrix': [],
-        'players': [],
-        'public': false
-    },
+    'game': <Game>{},
     'current_user': {
         'is_connected': false
     }
@@ -25,7 +21,7 @@ const loadGameData = () => {
     Connect4API.games.get(id)
         .then(res => {
             res.matrix = matrixAsColumns(res.matrix);
-            data.value.game = res;
+            data.value.game = res as Game;
         }) // Store returned data to the 'data' variable.
         .catch(error => console.error(error));
 }
@@ -33,7 +29,19 @@ const loadGameData = () => {
 const loadUserData = () => {
     // Load current user's data if it's connected.
 }
-    
+
+onBeforeMount(() => {
+    loadGameData();
+    loadUserData();
+});
+
+// -- PRE-GAME
+
+const colorChoice = (event: any, color: number) => {
+    alert(`Choosen color : ${color}`)
+}
+
+// -- GAME 
 const play = (event: any, column: number) => {
     Connect4API.games.play(id, String(column))
         .then(data => {
@@ -45,10 +53,6 @@ const play = (event: any, column: number) => {
         })
         .catch(error => console.error(error));
 };
-
-onBeforeMount(() => {
-    loadGameData()
-});
 </script>
 
 <template>
@@ -61,8 +65,8 @@ onBeforeMount(() => {
             <p class="players-count">Joueurs : {{ data.game.players.length }}/2</p>
             <p>Choisissez la pilule de votre choix...</p>
             <div class="pill-choice">
-                <img src="@/assets/choices_left.png" alt="Red Pill">
-                <img src="@/assets/choices_right.png" alt="Blue Pill">
+                <img @click="$event => colorChoice($event, 0)" src="@/assets/choices_left.png" alt="Red Pill">
+                <img @click="$event => colorChoice($event, 1)" src="@/assets/choices_right.png" alt="Blue Pill">
             </div>
         </div>
         <p class="connected-as" v-if="!data.current_user.is_connected">
@@ -77,8 +81,8 @@ onBeforeMount(() => {
             <div :class="'column-' + (index - 1)" @click="$event => play($event, index - 1)" v-for="index in data.game.matrix.length">
                 <div class="cells">
                     <div class="cell" v-for="cell in data.game.matrix[index - 1]">
-                        <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == '1'">
-                        <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == '2'">
+                        <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
+                        <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 2">
                         <img src="@/assets/void.svg" alt="NP" v-else>
                     </div>
                 </div>
@@ -103,6 +107,7 @@ onBeforeMount(() => {
 
 .pre-game p {
     font-family: 'Share Tech Mono', cursive;
+    text-align: center;
 }
 
 .pre-game > .privacy {

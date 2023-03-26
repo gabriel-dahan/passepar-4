@@ -1,6 +1,6 @@
 const APP_NAME = 'PASSEPAR-4'
 
-const matrixAsColumns = (matrix: any[][]) => {
+const matrixAsColumns = (matrix: number[][]) => {
     let newMatrix = [];
     for (let j = 0; j < 7; j++) {
         let column: number[] = [];
