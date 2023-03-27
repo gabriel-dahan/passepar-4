@@ -5,7 +5,7 @@
 ### Games
 
 - `/api/game/new` : [`POST`] Creates a new game record in the database.
-- `/api/game/list?onlyids=True` : [`GET`] Returns the list of all currently active games.
+- `/api/game/list?only_ids=True&only_public=True` : [`GET`] Returns the list of all currently active games.
 - `/api/game/<gamekey>` : [`GET`] Returns informations about a given game.
 - `/api/game/<gamekey>/addplayer` : [`POST`] Adds a player with given `player_id` in a game if it isn't full.
     
@@ -22,7 +22,7 @@
 > - `G1` : Maximum number of players reached.
 > - `G2` : Game ID doesn't exist.
 > - `G3` : No space left on the choosen column.
-> - `G4` : Requested player doesn't exist.
+> - `G4` : Requested user doesn't exist.
 > - `G5` : Player is already in a game.
 > - `G6` : The choosen column is invalid.
 
@@ -55,3 +55,4 @@
 > - `P3` : Email entered is not valid (for registration).
 > - `P4` : Login failed (incorrect password).
 > - `P5` : Player search limit cannot be greater than 100.
+> - `P6` : Session token not valid or doesn't exist.

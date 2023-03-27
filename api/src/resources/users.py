@@ -5,14 +5,14 @@ from email_validator import validate_email, EmailNotValidError
 
 from . import API_ROOT
 from .. import api, db
-from ..models import Player
+from ..models import User, AuthTokens
 from ..etc import generate_avatar_url
 
 from typing import List
 
-# --- PLAYERS API --- #
+# --- USERS API --- #
 
-class PlayerUpdate(Resource):
+class UserUpdate(Resource):
 
     def __init__(self) -> None:
         super().__init__()
@@ -22,28 +22,28 @@ class PlayerUpdate(Resource):
         self.parser.add_argument('password', type = str, location = 'form')
         self.parser.add_argument('score', type = int, location = 'form')
 
-    def put(self, playerid: str) -> Response:
-        player: Player = Player.query.filter_by(id = playerid).first()
-        if not player:
+    def put(self, userid: str) -> Response:
+        user: User = User.query.filter_by(id = userid).first()
+        if not user:
             return jsonify({
                 'code': 'P2',
-                'message': f'Player with id \'{playerid}\' doesn\'t exist.'
+                'message': f'User with id \'{userid}\' doesn\'t exist.'
             })
         args = self.parser.parse_args()
         for key, val in args.items():
             if not val:
                 continue
             if key == 'password':
-                player.password = generate_password_hash(val)
+                user.password = generate_password_hash(val)
                 continue
-            setattr(player, key, val)
+            setattr(user, key, val)
         db.session.commit()
         return jsonify({
-            'message': f'Player \'{player.id}\' was successfuly updated.',
-            'player': player.json_repr()
+            'message': f'user \'{user.id}\' was successfuly updated.',
+            'user': user.json_repr()
         })
 
-class SearchPlayer(Resource):
+class SearchUser(Resource):
 
     def __init__(self) -> None:
         super().__init__()
@@ -57,25 +57,25 @@ class SearchPlayer(Resource):
         if args['limit'] > 100:
             return jsonify({
                 'code': 'P5',
-                'message': 'Player search limit cannot be greater than 100.'
+                'message': 'User search limit cannot be greater than 100.'
             })
-        matches: List[Player] = Player.query.filter(
-            (Player.name.like(f"%{args['name']}%")) | (Player.email.like(f"%{args['email']}%"))
+        matches: List[User] = User.query.filter(
+            (User.name.like(f"%{args['name']}%")) | (User.email.like(f"%{args['email']}%"))
         ).limit(args['limit']).all()
-        return jsonify({'players': [player.json_repr() for player in matches]})
+        return jsonify({'users': [user.json_repr() for user in matches]})
     
-class PlayerInfo(Resource):
+class UserInfo(Resource):
 
-    def get(self, playerid: str) -> Response:
-        p: Player = Player.query.filter_by(id = playerid).first()
-        if not p:
+    def get(self, userid: str) -> Response:
+        u: User = User.query.filter_by(id = userid).first()
+        if not u:
             return jsonify({
                 'code': 'P2',
-                'message': f'Player with id \'{playerid}\' doesn\'t exist.'
+                'message': f'User with id \'{userid}\' doesn\'t exist.'
             })
-        return jsonify(p.json_repr())
+        return jsonify(u.json_repr())
 
-class LoginPlayer(Resource):
+class LoginUser(Resource):
 
     def __init__(self) -> None:
         super().__init__()
@@ -85,27 +85,30 @@ class LoginPlayer(Resource):
 
     def post(self) -> Response:
         args = self.parser.parse_args()
-        player: Player = Player.query.filter_by(email = args['email']).first()
-        if not player:
+        user: User = User.query.filter_by(email = args['email']).first()
+        if not user:
             return jsonify({
                 'code': 'P2',
-                'message': f'Player with email \'{args["email"]}\' doesn\'t exist.'
+                'message': f'User with email \'{args["email"]}\' doesn\'t exist.'
             })
-        valid = check_password_hash(player.password, args['password'])
+        valid = check_password_hash(user.password, args['password'])
         if not valid:
             return jsonify({
                 'code': 'P4',
-                'message': f'Login failed, incorrect password for the user \'{player.id}\'.'
+                'message': f'Login failed, incorrect password for the user \'{user.id}\'.'
             })
         
-        # --> Cookie storing TODO
+        auth = AuthTokens(user = user)
+        db.session.add(auth)
+        db.session.commit()
 
         return jsonify({
-            'message': f'Player \'{player.id}\' was successfuly logged in.',
-            'player': player.json_repr()
+            'message': f'User \'{user.id}\' was successfuly logged in.',
+            'user': user.json_repr(),
+            'auth_token': auth.token
         })
 
-class RegisterPlayer(Resource):
+class RegisterUser(Resource):
 
     def __init__(self) -> None:
         super().__init__()
@@ -128,8 +131,8 @@ class RegisterPlayer(Resource):
                 'human_readable': str(e)
             })
         email = v['email'] # Replaced with normalized form.
-        if player := Player.query.filter((Player.name == name) | (Player.email == email)).first():
-            if player.email == email:
+        if user := User.query.filter((User.name == name) | (User.email == email)).first():
+            if user.email == email:
                 return jsonify({
                     'code': 'P1',
                     'subcode': '1',
@@ -140,24 +143,57 @@ class RegisterPlayer(Resource):
                 'subcode': '2',
                 'message': 'This name is already taken.'
             })
-        p = Player(
+        u = User(
             name = name,
             email = email,
             avatar_url = generate_avatar_url(email),
             password = generate_password_hash(password)
         )
-        db.session.add(p)
+        db.session.add(u)
         db.session.commit()
 
         return jsonify({
-            'message': f'Player \'{p.id}\' was successfully registered.',
-            'player': p.json_repr()
+            'message': f'User \'{u.id}\' was successfully registered.',
+            'user': u.json_repr()
+        })
+    
+
+### TOKENS RELATIVE
+
+class GetUserSession(Resource):
+
+    def get(self, sessiontoken: str) -> Response:
+        t: AuthTokens = AuthTokens.query.filter_by(token = sessiontoken).first()
+        u: User = t.user
+        if not u:
+            return jsonify({
+                'code': 'P6',
+                'message': f'Session token \'{sessiontoken}\' is no longer valid.'
+            })
+        return jsonify(u.json_repr())
+
+class DeleteUserSession(Resource):
+
+    def delete(self, sessiontoken: str):
+        session: AuthTokens = AuthTokens.query.filter_by(token = sessiontoken).first()
+        if not session:
+            return jsonify({
+                'code': 'P6',
+                'message': f'Session with token \'{sessiontoken}\' does not exist.'
+            })
+        db.session.delete(session)
+        db.session.commit()
+        return jsonify({
+            'message': f'Session with token \'{session.token}\' was successfuly deleted.',
+            'session': session.json_repr()
         })
 
 # -- RESOURCES -- #
-root = f'{API_ROOT}/player'
-api.add_resource(PlayerUpdate, f'{root}/<string:playerid>/update')
-api.add_resource(PlayerInfo, f'{root}/<string:playerid>/')
-api.add_resource(LoginPlayer, f'{root}/login')
-api.add_resource(RegisterPlayer, f'{root}/register')
-api.add_resource(SearchPlayer, f'{root}/search')
+root = f'{API_ROOT}/user'
+api.add_resource(UserUpdate, f'{root}/<string:userid>/update')
+api.add_resource(UserInfo, f'{root}/<string:userid>')
+api.add_resource(LoginUser, f'{root}/login')
+api.add_resource(RegisterUser, f'{root}/register')
+api.add_resource(SearchUser, f'{root}/search')
+api.add_resource(GetUserSession, f'{root}/token/<string:sessiontoken>')
+api.add_resource(DeleteUserSession, f'{root}/token/<string:sessiontoken>/delete')

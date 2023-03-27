@@ -122,7 +122,3 @@ class ShellPower4(object):
     @classmethod
     def clear(cls) -> None:
         os.system('cls') if os.name == 'nt' else os.system('clear')
-
-if __name__ == '__main__':
-    p4 = Power4()
-    p4.shell_run()
