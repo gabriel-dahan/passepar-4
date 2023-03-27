@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, type ComponentPublicInstance } from 'vue';
+import { ref, onMounted, type ComponentPublicInstance } from 'vue';
 
 import { APP_NAME } from '@/assets/ts/utils';
 import { Connect4API } from '@/assets/ts/api';
+import type { Game } from '@/assets/ts/interfaces';
 
 let gameId = ref('');
+
+let publicGames = ref([]);
 
 // Err. codes
 let G2 = ref(false);
@@ -18,6 +21,10 @@ const getGame = (vm: ComponentPublicInstance) => {
             G2.value = true;
     });
 }
+
+onMounted(() => {
+    Connect4API.games.list(false, true).then(data => publicGames.value = data.games);
+})
 </script>
 
 <template>
@@ -36,13 +43,18 @@ const getGame = (vm: ComponentPublicInstance) => {
             Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
             parties et obtenant le plus de points sera l'élu du classement !</p>
             <h2>Parties publiques : </h2>
+            <div class="games">
+                <div class="game" v-for="game in <Game[]>publicGames">
+                    <span class="g-id">{{ game.id }}</span>
+                    <span class="n-players">{{ game.players.length }}/2</span>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
 p {
-    font-family: 'Share Tech Mono', cursive;
     text-align: center;
 }
 
@@ -94,7 +106,6 @@ h2 {
 
 .content h2 {
     color: var(--matrix-text);
-    font-family: 'Share Tech Mono', cursive;
     text-align: center;
 }
 
@@ -109,7 +120,6 @@ h2 {
     background-color: var(--color-background);
     opacity: 0;
     color: var(--matrix-text);
-    font-family: 'Share Tech Mono', cursive;
     outline: none;
 }
 
@@ -119,10 +129,10 @@ h2 {
 }
 
 .content > .btns > button {
+    font-family: 'Share Tech Mono', cursive;
     padding: 10px 20px;
     border-radius: 8px;
     border-style: solid;
-    font-family: 'Share Tech Mono';
     animation-duration: 4.1s;
     transition-duration: 0.4s;
 }
@@ -148,6 +158,27 @@ h2 {
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
     color: #000;
+}
+
+.content > .games {
+    max-width: 550px;
+    display: flex;
+    gap: 20px;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+.content > .games > .game {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background-darker);
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid transparent;
+}
+
+.content > .games > .game:hover {
+    border: 2px solid var(--matrix-text);
 }
 
 

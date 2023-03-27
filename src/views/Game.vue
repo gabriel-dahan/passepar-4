@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { onMounted, ref, inject } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Connect4API } from '@/assets/ts/api';
 import { matrixAsColumns } from '@/assets/ts/utils';
 
-import type { Game } from '@/assets/ts/interfaces';
+import type { Game, Player } from '@/assets/ts/interfaces';
 
 const route = useRoute();
 const id = route.params.id as string;
 
 const data = ref({
     'game': <Game>{},
-    'current_user': {
-        'is_connected': false
-    }
+});
+
+const $promisedUser: Promise<Player> | Promise<null> | undefined = inject('promisedUser');
+const currentUser = ref();
+const loadCurrentUser = (async () => {
+    let user = await $promisedUser;
+    if(user !== undefined)
+        currentUser.value = user;
+    else
+        console.error('Current user cannot be loaded.')
 });
 
 const loadGameData = () => {
@@ -26,13 +33,9 @@ const loadGameData = () => {
         .catch(error => console.error(error));
 }
 
-const loadUserData = () => {
-    // Load current user's data if it's connected.
-}
-
-onBeforeMount(() => {
+onMounted(async () => {
     loadGameData();
-    loadUserData();
+    await loadCurrentUser();
 });
 
 // -- PRE-GAME
@@ -69,8 +72,11 @@ const play = (event: any, column: number) => {
                 <img @click="$event => colorChoice($event, 1)" src="@/assets/choices_right.png" alt="Blue Pill">
             </div>
         </div>
-        <p class="connected-as" v-if="!data.current_user.is_connected">
+        <p class="connected-as" v-if="!currentUser">
             Vous jouez en tant qu'invité.
+        </p>
+        <p class="connected-as" v-else>
+            Vous jouez en tant que <span class="username">{{ currentUser.name }}</span>
         </p>
     </div>
 
@@ -148,6 +154,10 @@ const play = (event: any, column: number) => {
 .pre-game > .connected-as {
     color: var(--color-small-text);
     font-size: 14px;
+}
+
+.pre-game > .connected-as > .username {
+    color: var(--matrix-text);
 }
 
 .game > #grid {

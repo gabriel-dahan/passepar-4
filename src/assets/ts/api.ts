@@ -62,6 +62,11 @@ class Players {
             .then(res => res.json());
     }
 
+    async from_session(token: string) {
+        return __get(`${this.endpoint}/token/${token}`)
+            .then(res => res.json());
+    }
+
     async update(id: string, name_ = null, email = null, password = null, score = null) {
         return __put(`${this.endpoint}/${id}/update`, { 
             name: name_,
@@ -80,9 +85,9 @@ class Games {
         this.endpoint = API_BASE + '/game';
     }
 
-    async new(privacy: boolean) {
+    async new(public_: boolean) {
         return __post(`${this.endpoint}/new`, {
-            public: privacy
+            public: public_
         }).then(res => res.json());
     }
 

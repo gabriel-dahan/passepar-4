@@ -11,6 +11,9 @@
     --vt-c-indigo: #2c3e50;
 
     --vt-c-flashy-green: #39F63B;
+    --vt-c-soft-red: #e97171;
+    --vt-c-soft-blue-1: #71a5e9;
+    --vt-c-soft-blue-2: rgb(84, 143, 219);
 
     --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
     --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
@@ -27,6 +30,7 @@
 /* Used variables */
 :root {
     --color-background: var(--vt-c-black);
+    --color-background-darker: var(--vt-c-divider-light-1);
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
 
@@ -37,6 +41,10 @@
     --color-text: var(--vt-c-text-dark-2);
     --color-small-text: var(--vt-c-text-dark-3);
     --matrix-text: var(--vt-c-flashy-green);
+    --error-text: var(--vt-c-soft-red);
+
+    --link-blue: var(--vt-c-soft-blue-1);
+    --link-blue-hover: var(--vt-c-soft-blue-2);
 }
 
 *,

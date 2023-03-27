@@ -73,7 +73,7 @@
     padding: 5px;
     border-radius: 8px;
     border-style: solid;
-    font-family: 'Share Tech Mono';
+    font-family: 'Share Tech Mono', cursive;
     transition-duration: 0.4s;
 }
 
@@ -81,5 +81,10 @@
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);
+}
+
+.form-container > form > .fields > .f-field > .f-error {
+    color: var(--error-text);
+    font-family: 'Share Tech Mono', cursive;
 }
 </style>

@@ -13,11 +13,15 @@
     font-weight: normal;
 }
 
-#app>main {
+#app > main {
     padding: 2rem;
     flex: 1;
 }
 
 .__blank {
     flex: 1;
+}
+
+h2, p {
+    font-family: 'Share Tech Mono', cursive;
 }
