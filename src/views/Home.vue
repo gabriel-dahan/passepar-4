@@ -7,7 +7,7 @@ import type { Game } from '@/assets/ts/interfaces';
 
 let gameId = ref('');
 
-let publicGames = ref([]);
+let publicGames = ref([] as Game[]);
 
 // Err. codes
 let G2 = ref(false);
@@ -23,7 +23,9 @@ const getGame = (vm: ComponentPublicInstance) => {
 }
 
 onMounted(() => {
-    API.games.list(false, true).then(data => publicGames.value = data.games);
+    API.games.list(false, true).then(data => publicGames.value = (<Game[]>data.games).filter(g => { 
+        return g.players.length === 1
+    }));
 })
 </script>
 
@@ -43,16 +45,13 @@ onMounted(() => {
             Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
             parties et obtenant le plus de points sera l'élu du classement !</p>
             <h2>Parties publiques : </h2>
-            <div class="games">
-                <div class="game" @click="$router.push(`/game/${game.id}`)" 
-                    v-for="game in (<Game[]>publicGames).filter(g => { 
-                        return g.players.length === 1
-                    })"
-                >
+            <div class="games" v-if="publicGames.length > 0">
+                <div class="game" @click="$router.push(`/game/${game.id}`)" v-for="game in publicGames">
                     <span class="g-id">{{ game.id }}</span>
                     <span class="n-players">{{ game.players.length }}/2</span>
                 </div>
             </div>
+            <p v-else>Aucune partie publique n'est disponible :(</p>
         </div>
     </div>
 </template>

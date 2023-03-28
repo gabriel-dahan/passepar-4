@@ -1,21 +1,45 @@
 <script setup lang="ts">
 const playAudio = () => {
     const audioElem = <HTMLAudioElement>document.getElementById('backsong');
-    audioElem.play();
+    const btn = <HTMLButtonElement>document.getElementById('songBtn');
+    if(!audioElem.paused) {
+        audioElem.pause();
+        btn.classList.remove('playing');
+    }
+    else {
+        audioElem.play();
+        btn.classList.add('playing');
+    }
 };
 </script>
 
 <template>
-    <button @click="playAudio">SONG ?</button>
-    <audio id="backsong">
+    <button id="songBtn" @click="playAudio">♪</button>
+    <audio id="backsong" loop>
         <source src="@/assets/backsong.mp3">
     </audio>
 </template>
 
 <style scoped>
-audio {
+
+button {
+    z-index: 1;
     position: absolute;
-    width: 100vw;
-    height: 100vh;
+    left: 20px;
+    bottom: 20px;
+    outline: none;
+    border: 2px transparent solid;
+    border-radius: 5px;
+    transition: 0.3s;
+    background-color: gray;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #1ec572;
+}
+
+button.playing:not(:hover) {
+    background: #31f593;
 }
 </style>
