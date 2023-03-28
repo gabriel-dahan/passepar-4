@@ -26,7 +26,7 @@ class UserUpdate(Resource):
         user: User = User.query.filter_by(id = userid).first()
         if not user:
             return jsonify({
-                'code': 'P2',
+                'code': 'U2',
                 'message': f'User with id \'{userid}\' doesn\'t exist.'
             })
         args = self.parser.parse_args()
@@ -56,7 +56,7 @@ class SearchUser(Resource):
         args = self.parser.parse_args()
         if args['limit'] > 100:
             return jsonify({
-                'code': 'P5',
+                'code': 'U5',
                 'message': 'User search limit cannot be greater than 100.'
             })
         matches: List[User] = User.query.filter(
@@ -70,7 +70,7 @@ class UserInfo(Resource):
         u: User = User.query.filter_by(id = userid).first()
         if not u:
             return jsonify({
-                'code': 'P2',
+                'code': 'U2',
                 'message': f'User with id \'{userid}\' doesn\'t exist.'
             })
         return jsonify(u.json_repr())
@@ -88,13 +88,13 @@ class LoginUser(Resource):
         user: User = User.query.filter_by(email = args['email']).first()
         if not user:
             return jsonify({
-                'code': 'P2',
+                'code': 'U2',
                 'message': f'User with email \'{args["email"]}\' doesn\'t exist.'
             })
         valid = check_password_hash(user.password, args['password'])
         if not valid:
             return jsonify({
-                'code': 'P4',
+                'code': 'U4',
                 'message': f'Login failed, incorrect password for the user \'{user.id}\'.'
             })
         
@@ -126,7 +126,7 @@ class RegisterUser(Resource):
             v = validate_email(email)
         except EmailNotValidError as e:
             return jsonify({
-                'code': 'P3',
+                'code': 'U3',
                 'message': f'Email \'{email}\' is not valid.',
                 'human_readable': str(e)
             })
@@ -134,13 +134,13 @@ class RegisterUser(Resource):
         if user := User.query.filter((User.name == name) | (User.email == email)).first():
             if user.email == email:
                 return jsonify({
-                    'code': 'P1',
-                    'subcode': '1',
+                    'code': 'U1',
+                    'subcode': 'S1',
                     'message': 'This email already exists in the database.'
                 })
             return jsonify({
-                'code': 'P1',
-                'subcode': '2',
+                'code': 'U1',
+                'subcode': 'S2',
                 'message': 'This name is already taken.'
             })
         u = User(
@@ -167,7 +167,7 @@ class GetUserSession(Resource):
         u: User = t.user
         if not u:
             return jsonify({
-                'code': 'P6',
+                'code': 'U6',
                 'message': f'Session token \'{sessiontoken}\' is no longer valid.'
             })
         return jsonify(u.json_repr())
@@ -178,7 +178,7 @@ class DeleteUserSession(Resource):
         session: AuthTokens = AuthTokens.query.filter_by(token = sessiontoken).first()
         if not session:
             return jsonify({
-                'code': 'P6',
+                'code': 'U6',
                 'message': f'Session with token \'{sessiontoken}\' does not exist.'
             })
         db.session.delete(session)

@@ -10,7 +10,7 @@ class API(Resource):
 
     def get(self):
         return jsonify({
-            'api': 'Connect4 - API',
+            'api': 'PP4 - API',
             'version': 'v0.1[beta]',
             'authors': [
                 'Gabriel DAHAN'

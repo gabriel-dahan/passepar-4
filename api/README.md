@@ -28,31 +28,35 @@
 
 ### Players
 
-- `/api/player/login`: [`POST`] Logins a player using its `email` and `password`.
+- `/api/user/login`: [`POST`] Logins a user using its `email` and `password`. Returns a _session token_.
 
     - `email`: string
     - `password`: string
 
-- `/api/player/register` : [`POST`] Registers a player with its `name`, `email` and `password`. 
+- `/api/user/register` : [`POST`] Registers a user with its `name`, `email` and `password`. 
 
     - `name` : string
     - `email` : string
     - `password` : string
 
-- `/api/player/search?name=...&email=...&limit=10` : [`GET`] Returns all users maching a specific `name` (default: '') or `email` (default: '') with a `limit` of 10 users by default (max: 100).
-- `/api/player/<playerid>` : [`GET`] Returns informations about a given player.
-- `/api/player/<playerid>/update` : [`PUT`] Updates a player's informations.
+- `/api/user/search?name=...&email=...&limit=10` : [`GET`] Returns all users maching a specific `name` (default: '') or `email` (default: '') with a `limit` of 10 users by default (max: 100).
+- `/api/user/<playerid>` : [`GET`] Returns informations about a given user.
+- `/api/user/<playerid>/update` : [`PUT`] Updates a user's informations.
 
     - `name`: string (optional)
     - `email` : string (optional)
     - `password` : string (optional)
     - `score`: integer (optional)
 
+- `/api/user/token/<session_token>` : [`GET`] Get a player's informations using a registered session token.
+
+- `/api/user/token/<session_token>/delete` : [`DELETE`] Deletes a user's session.
+
 > **Error codes** : 
 >
-> - `P1` : Player's email (`1`) or name (`2`) already exists in the database.
-> - `P2` : Player with given id or email doesn't exist.
-> - `P3` : Email entered is not valid (for registration).
-> - `P4` : Login failed (incorrect password).
-> - `P5` : Player search limit cannot be greater than 100.
-> - `P6` : Session token not valid or doesn't exist.
+> - `U1` : Player's email (`1`) or name (`2`) already exists in the database.
+> - `U2` : Player with given id or email doesn't exist.
+> - `U3` : Email entered is not valid (for registration).
+> - `U4` : Login failed (incorrect password).
+> - `U5` : Player search limit cannot be greater than 100.
+> - `U6` : Session token not valid or doesn't exist.

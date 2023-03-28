@@ -31,6 +31,8 @@ class Player(db.Model):
 
     def json_repr(self) -> dict:
         return {
+            'id': self.id,
+            'color': self.color,
             'user': self.user,
             'game': self.game
         }

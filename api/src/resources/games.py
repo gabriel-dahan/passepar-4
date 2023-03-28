@@ -1,6 +1,8 @@
 from flask import jsonify, Response
 from flask_restful import Resource, request, reqparse
 
+from typing import Union
+
 from .. import api, db
 from ..models import Game, Player, User
 from ..core import GameCore
@@ -34,7 +36,7 @@ class AddPlayer(Resource):
             })
         
         if user_id:
-            user: User = User.query.filter_by(user_id = user_id).first()
+            user: User = User.query.filter_by(id = user_id).first()
             if not user:
                 return jsonify({
                     'code': 'G4',
