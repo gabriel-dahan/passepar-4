@@ -1,6 +1,45 @@
+import _ from 'lodash';
+
 const HOST = '127.0.0.1' //'51.83.73.242';
 const PORT = 5000 //1102;
 const API_BASE = `http://${HOST}:${PORT}/api`;
+
+const ERR_CODES = {
+    // -- See error codes : https://github.com/gabriel-dahan/connect4-game/blob/main/api/README.md --
+
+    G1: false,
+    G2: false,
+    G3: false,
+    G4: false,
+    G5: false,
+    G6: false,
+
+    U1: {
+        S1: false,
+        S2: false
+    },
+    U2: false,
+    U3: false,
+    U4: false,
+    U5: false,
+    U6: false
+}
+
+const getRawErrs = () => {
+    return _.cloneDeep({
+        ...ERR_CODES,
+        noMatch: false // In case passwords do not match.
+    })
+}
+
+const updateErrs = (ref: any, data: any) => {
+    const errCode = data.code;
+    const errSubCode = data.subcode;
+    if(Object.keys(ref.value).includes(errCode) && errSubCode == undefined)
+        ref.value[errCode] = true;
+    else if(errSubCode)
+        ref.value[errCode][errSubCode] = true;
+}
 
 const __formatData = (payload: any) => {
     let formData = new FormData();
@@ -29,11 +68,11 @@ const __put = (endpoint: string, payload = {}) => __post(endpoint, payload, 'PUT
 
 const __delete = (endpoint:string, payload = {}) => __post(endpoint, payload, 'DELETE');
 
-class Players {
+class Users {
     endpoint: string;
 
     constructor() {
-        this.endpoint = API_BASE + '/player';
+        this.endpoint = API_BASE + '/user';
     }
 
     async register(name_: string, email: string, password: string) {
@@ -64,6 +103,11 @@ class Players {
 
     async from_session(token: string) {
         return __get(`${this.endpoint}/token/${token}`)
+            .then(res => res.json());
+    }
+
+    async delete_session(token: string) {
+        return __delete(`${this.endpoint}/token/${token}/delete`)
             .then(res => res.json());
     }
 
@@ -102,9 +146,11 @@ class Games {
             .then(res => res.json());
     }
 
-    async addplayer(gameKey: string, playerId: string) {
+    async addplayer(gameKey: string, color: number, userId: string | null = null) {
+        /* userId is null when the player added is a guest (no-user). */
         return __post(`${this.endpoint}/${gameKey}/addplayer`, { 
-            player_id: playerId
+            user_id: userId,
+            color: color
         }).then(res => res.json());
     }
 
@@ -120,9 +166,9 @@ class Games {
     }
 }
 
-const Connect4API = {
-    'players': new Players(),
+const API = {
+    'users': new Users(),
     'games': new Games()
 }
 
-export { Connect4API };
+export { API, getRawErrs, updateErrs };

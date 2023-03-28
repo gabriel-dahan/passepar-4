@@ -1,20 +1,19 @@
 // MODELS INTERFACES
 
-interface Trophy {
+interface Player {
     id: string,
-    title: string,
-    description: string
+    color: number,
+    user: User,
+    game: Game
 }
 
-interface Player {
+interface User {
     id: string,
     name: string,
     avatar_url: string,
     email: string,
     anonymized_email: string,
-    score: number,
-    trophies: Trophy[],
-    current_game: Game
+    score: number
 }
 
 interface Game {
@@ -27,4 +26,4 @@ interface Game {
     public: boolean
 }
 
-export type { Trophy, Player, Game }
+export type { User, Player, Game }

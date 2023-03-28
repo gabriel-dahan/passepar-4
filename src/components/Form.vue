@@ -4,7 +4,7 @@
 
 <template>
     <div class="form-container">
-        <form @submit="$emit('submited')" onsubmit="return false;">
+        <form @submit="$emit('submited')" onsubmit="return false;" novalidate>
             <slot></slot>
         </form>
     </div>

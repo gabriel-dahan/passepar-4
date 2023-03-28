@@ -2,51 +2,57 @@
 import { onMounted, ref, inject } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { Connect4API } from '@/assets/ts/api';
+import { API } from '@/assets/ts/api';
 import { matrixAsColumns } from '@/assets/ts/utils';
 
-import type { Game, Player } from '@/assets/ts/interfaces';
+import type { Game, User } from '@/assets/ts/interfaces';
 
 const route = useRoute();
 const id = route.params.id as string;
 
-const data = ref({
-    'game': <Game>{},
-});
+/* --- REFS --- */
+const game = ref({} as Game);
 
-const $promisedUser: Promise<Player> | Promise<null> | undefined = inject('promisedUser');
-const currentUser = ref();
-const loadCurrentUser = (async () => {
+const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
+const currentUser = ref({} as User);
+/* ------------ */
+
+const loadCurrentUser = async () => {
     let user = await $promisedUser;
     if(user !== undefined)
-        currentUser.value = user;
+        currentUser.value = user as User;
     else
         console.error('Current user cannot be loaded.')
-});
+};
 
-const loadGameData = () => {
-    Connect4API.games.get(id)
-        .then(res => {
-            res.matrix = matrixAsColumns(res.matrix);
-            data.value.game = res as Game;
-        }) // Store returned data to the 'data' variable.
-        .catch(error => console.error(error));
+const loadGameData = async () => {
+    let loadedGame = await API.games.get(id);
+    loadedGame.matrix = matrixAsColumns(loadedGame.matrix);
+    game.value = loadedGame;
 }
 
 onMounted(async () => {
-    loadGameData();
+    await loadGameData();
     await loadCurrentUser();
 });
 
-// -- PRE-GAME
+/* --- PRE-GAME --- */ 
 
 const colorChoice = (event: any, color: number) => {
-    alert(`Choosen color : ${color}`)
+    let userId = currentUser.value ? currentUser.value.id : '';
+    API.games.addplayer(id, color, userId)
+        .then(data => {
+            console.log(data)
+        });
 }
 
-// -- GAME 
+/* ---------------- */ 
+
+
+/* --- GAME --- */ 
+
 const play = (event: any, column: number) => {
-    Connect4API.games.play(id, String(column))
+    API.games.play(id, String(column))
         .then(data => {
             loadGameData(); // Reloads the game's data.
 
@@ -56,20 +62,22 @@ const play = (event: any, column: number) => {
         })
         .catch(error => console.error(error));
 };
+
+/* ------------ */ 
 </script>
 
 <template>
     <!-- PRE-GAME SCREEN -->
-    <div class="pre-game" v-if="data.game.id && data.game.players.length < 2">
-        <p class="privacy public" v-if="data.game.public">Partie publique</p>
+    <div class="pre-game" v-if="game.id && game.players.length < 2">
+        <p class="privacy public" v-if="game.public">Partie publique</p>
         <p class="privacy private" v-else>Partie privée</p>
         <div class="main-content">
-            <h1 class="game-title">Partie #{{ data.game.id }}</h1>
-            <p class="players-count">Joueurs : {{ data.game.players.length }}/2</p>
+            <h1 class="game-title">Partie #{{ game.id }}</h1>
+            <p class="players-count">Joueurs : {{ game.players.length }}/2</p>
             <p>Choisissez la pilule de votre choix...</p>
             <div class="pill-choice">
-                <img @click="$event => colorChoice($event, 0)" src="@/assets/choices_left.png" alt="Red Pill">
-                <img @click="$event => colorChoice($event, 1)" src="@/assets/choices_right.png" alt="Blue Pill">
+                <img @click="colorChoice($event, 0)" src="@/assets/choices_left.png" alt="Red Pill">
+                <img @click="colorChoice($event, 1)" src="@/assets/choices_right.png" alt="Blue Pill">
             </div>
         </div>
         <p class="connected-as" v-if="!currentUser">
@@ -81,12 +89,12 @@ const play = (event: any, column: number) => {
     </div>
 
     <!-- STARTED GAME -->
-    <div class="game" v-else-if="data.game.id && data.game.players.length === 2">
+    <div class="game" v-else-if="game.id && game.players.length === 2">
         <div id="grid">
             <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
-            <div :class="'column-' + (index - 1)" @click="$event => play($event, index - 1)" v-for="index in data.game.matrix.length">
+            <div :class="'column-' + (index - 1)" @click="play($event, index - 1)" v-for="index in game.matrix.length">
                 <div class="cells">
-                    <div class="cell" v-for="cell in data.game.matrix[index - 1]">
+                    <div class="cell" v-for="cell in game.matrix[index - 1]">
                         <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
                         <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 2">
                         <img src="@/assets/void.svg" alt="NP" v-else>
@@ -96,6 +104,7 @@ const play = (event: any, column: number) => {
                 <span class="col-num">{{ index }}</span>
             </div>
         </div>
+        <p>Partie #{{ game.id }}</p>
     </div>
 </template>
 

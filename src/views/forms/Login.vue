@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Connect4API } from '@/assets/ts/api';
-import Form from '@/components/Form.vue'
 
-const email = ref('');
-const pwd = ref('');
+import { API, getRawErrs, updateErrs } from '@/assets/ts/api';
+import Form from '@/components/Form.vue'
 
 const router = useRouter();
 
+/* --- REFS --- */
+const email = ref('');
+const pwd = ref('');
+
+const errors = ref(getRawErrs());
+/* ------------ */
+
 const logUser = (e: SubmitEvent) => {
-    Connect4API.players.login(email.value, pwd.value)
+    API.users.login(email.value, pwd.value)
         .then(data => {
+            errors.value = getRawErrs();
             if(data.auth_token) {
                 localStorage.setItem('auth_token', data.auth_token)
-                router.push(`/p/${data.player.id}`).then(() => router.go(0));
+                router.push(`/p/${data.user.id}`).then(() => router.go(0));
             }
+            else if(data && data.code)
+                updateErrs(errors, data);
         });
 }
 </script>
@@ -28,11 +36,13 @@ const logUser = (e: SubmitEvent) => {
                 <label for="email">Email</label>
                 <input id="email" type="email" placeholder="passe@par4.fr"
                     v-model="email">
+                <span class="f-error" v-if="errors.U2">Cette adresse email n'est pas enregistrée.</span>
             </div>
             <div class="f-field">
                 <label for="password">Mot de passe</label>
                 <input id="password" type="password" placeholder="1234?"
                     v-model="pwd">
+                <span class="f-error" v-if="errors.U4">Le mot de passe entré est incorrect.</span>
             </div>
         </div>
         <div class="f-submit">

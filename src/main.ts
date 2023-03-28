@@ -2,8 +2,8 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 import './assets/main.css'
-import { Connect4API } from './assets/ts/api';
-import type { Player } from './assets/ts/interfaces';
+import { API } from './assets/ts/api';
+import type { User } from './assets/ts/interfaces';
 
 import router from './routes'
 
@@ -11,17 +11,17 @@ const app = createApp(App);
 app.use(router);
 app.mount('#app');
 
-let $promisedUser: Promise<Player | null> = Promise.resolve(null);
-const sessionToken = localStorage.getItem('auth_token');
-if(sessionToken) {
-    $promisedUser = Connect4API.players.from_session(sessionToken).then(data => { return data?.id ? data : null; });
-}
+/* Get current logged user (using session token). */
+let $promisedUser: Promise<User | null> = Promise.resolve(null);
+const sessionToken = localStorage.getItem('auth_token'); // Get auth_token locally stored.
+if(sessionToken)
+    $promisedUser = API.users.from_session(sessionToken).then(data => { return data?.id ? data : null; });
 
-app.provide('promisedUser', $promisedUser)
+app.provide('promisedUser', $promisedUser) // Provide global Vue variable to get current user in other vues.
 
 $promisedUser.then(user => {
     router.beforeEach((to, from) => {
-        if (to.meta.redirectAuth && user) {
+        if (to.meta.redirectProfile && user) {
             router.push(`/p/${user.id}`)
         }
     });

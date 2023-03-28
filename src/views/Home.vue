@@ -2,7 +2,7 @@
 import { ref, onMounted, type ComponentPublicInstance } from 'vue';
 
 import { APP_NAME } from '@/assets/ts/utils';
-import { Connect4API } from '@/assets/ts/api';
+import { API } from '@/assets/ts/api';
 import type { Game } from '@/assets/ts/interfaces';
 
 let gameId = ref('');
@@ -14,7 +14,7 @@ let G2 = ref(false);
 
 const getGame = (vm: ComponentPublicInstance) => {
     const gId = gameId.value;
-    Connect4API.games.get(gId).then(data => {
+    API.games.get(gId).then(data => {
         if (data.code !== 'G2')
             vm.$router.push({ name: 'game', params: { gId } });
         else
@@ -23,7 +23,7 @@ const getGame = (vm: ComponentPublicInstance) => {
 }
 
 onMounted(() => {
-    Connect4API.games.list(false, true).then(data => publicGames.value = data.games);
+    API.games.list(false, true).then(data => publicGames.value = data.games);
 })
 </script>
 
@@ -44,7 +44,11 @@ onMounted(() => {
             parties et obtenant le plus de points sera l'élu du classement !</p>
             <h2>Parties publiques : </h2>
             <div class="games">
-                <div class="game" v-for="game in <Game[]>publicGames">
+                <div class="game" @click="$router.push(`/game/${game.id}`)" 
+                    v-for="game in (<Game[]>publicGames).filter(g => { 
+                        return g.players.length === 1
+                    })"
+                >
                     <span class="g-id">{{ game.id }}</span>
                     <span class="n-players">{{ game.players.length }}/2</span>
                 </div>
@@ -175,6 +179,7 @@ h2 {
     padding: 10px;
     border-radius: 5px;
     border: 2px solid transparent;
+    transition: 0.5s;
 }
 
 .content > .games > .game:hover {

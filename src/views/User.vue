@@ -16,7 +16,7 @@ const disconnectUser = () => {
 </script>
 
 <template>
-    <p>Player {{ id }}</p>
+    <p>User {{ id }}</p>
     <button @click="disconnectUser" v-if="isAuthenticated">Se déconnecter</button>
 </template>
 
