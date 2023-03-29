@@ -23,7 +23,7 @@ h1 {
       width: 23ch;
     overflow: hidden;
       white-space: nowrap;
-      animation: type 2.5s steps(23, end);
+      animation: type 2.7s steps(23, end);
       animation-iteration-count: infinite;
   }
 

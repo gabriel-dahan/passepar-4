@@ -26,6 +26,15 @@ h1 {
 h2{
   position : relative;
   left: 43%;
+  margin-top: 1rem;
+  color: #39F63B;
+  font-family: 'Press Start 2P', cursive;
+  font-size: medium;
+}
+
+h2.textanim{
+  position : relative;
+  left: 45%;
   margin-top: 6rem;
   color: #39F63B;
   font-family: 'Share Tech Mono', cursive;

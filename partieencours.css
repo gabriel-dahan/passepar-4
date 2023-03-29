@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body{
+    background-color: #1D1D1D;
+}
+
+h1 {
+    font-family: 'Press Start 2P', cursive;
+    color: #39F63B;
+    text-align: center;
+    margin-top: 4rem;
+}
+
+h2{
+    font-family: 'Press Start 2P', cursive;
+    color: #39F63B;
+    font-size: medium;
+    text-align: center;  
+}
+
+p{
+    font-size: larger;
+    font-family: 'Share Tech Mono', cursive;
+    color: #39F63B;
+    text-align: center;
+}
+
+.flex-container{
+    margin-top: 5rem;
+    flex-direction: column;
+    align-items: center;
+}
+
+button{
+    position: relative;
+    left: 47%;
+    margin-top: 1rem;
+    padding :10px 20px;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #39F63B;
+    background-color: #39F63B;
+    font-family: 'Share Tech Mono';
+    animation-name: appearbutton;
+    animation-duration: 4.1s;
+    transition-duration: 0.4s;
+  }
+  
+  button:hover{
+    background-color: #1D1D1D;
+    border-color: #39F63B;
+    color:#39F63B;
+  }

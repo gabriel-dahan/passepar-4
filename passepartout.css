@@ -1,0 +1,28 @@
+body{
+    background-color: #1d1d1d;
+}
+.imgpassepartout{
+    margin-top: 10%;
+}
+
+.passepartout{
+    width: 350px;
+    position :relative;
+    top : 40%;
+    left : 38%;
+    animation: victory 2s;
+}
+
+@keyframes victory{
+    0%{
+        width: 0px;
+        position: relative;
+        margin-top :13%;
+        left: 47%;
+        transform : rotate(1deg);
+    }
+    100%{
+        width: 350px;
+        transform: rotate(1080deg);
+    }
+}

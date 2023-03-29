@@ -11,3 +11,28 @@ h1 {
     text-align: center;
     margin-top: 4rem;
 }
+
+h2{
+    font-family: 'Press Start 2P', cursive;
+    color: #39F63B;
+    font-size: medium;
+    text-align: center;  
+}
+
+h4{
+    font-family: 'Share Tech Mono';
+    font-size: 25;
+    color: #39F63B;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+}
+
+h3{
+    font-family: 'Share Tech Mono';
+    font-size: 25;
+    color: #39F63B;
+    position: absolute;
+    top: 50px;
+    right: 50px;
+}
