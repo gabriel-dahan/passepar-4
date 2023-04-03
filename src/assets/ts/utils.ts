@@ -1,3 +1,6 @@
+import type { Ref } from "vue";
+import type { User } from "./interfaces";
+
 const APP_NAME = 'PASSEPAR-4'
 
 const matrixAsColumns = (matrix: number[][]) => {
@@ -12,4 +15,12 @@ const matrixAsColumns = (matrix: number[][]) => {
     return newMatrix
 };
 
-export { matrixAsColumns, APP_NAME };
+const loadCurrentUser = async (promisedUser: Promise<User> | Promise<null> | undefined, ref: Ref) => {
+    let user = await promisedUser;
+    if(user !== undefined)
+        ref.value = user as User;
+    else
+        console.error('Current user cannot be loaded.')
+};
+
+export { matrixAsColumns, APP_NAME, loadCurrentUser };

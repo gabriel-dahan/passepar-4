@@ -1,36 +1,58 @@
 <script setup lang="ts">
-import { ref, onMounted, type ComponentPublicInstance } from 'vue';
+import { ref, onMounted, inject } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { APP_NAME } from '@/assets/ts/utils';
+import { APP_NAME, loadCurrentUser } from '@/assets/ts/utils';
 import { API } from '@/assets/ts/api';
-import type { Game } from '@/assets/ts/interfaces';
+import type { Game, User } from '@/assets/ts/interfaces';
 
+const router = useRouter();
+
+/* --- REFS --- */
 let gameId = ref('');
 
 let publicGames = ref([] as Game[]);
 
+const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
+const currentUser = ref({} as User);
+/* ------------ */
+
 // Err. codes
 let G2 = ref(false);
 
-const getGame = (vm: ComponentPublicInstance) => {
+const getGame = () => {
     const gId = gameId.value;
     API.games.get(gId).then(data => {
         if (data.code !== 'G2')
-            vm.$router.push({ name: 'game', params: { gId } });
+            router.push({ name: 'game', params: { gId } });
         else
             G2.value = true;
     });
 }
 
-onMounted(() => {
-    API.games.list(false, true).then(data => publicGames.value = (<Game[]>data.games).filter(g => { 
-        return g.players.length === 1
-    }));
+const createGame = () => {
+    API.games.new(false, currentUser.value.id)
+        .then(data => { 
+            let gId = data?.game.id;
+            router.push(`/game/${gId}`);
+        })
+        .catch(err => console.error(err));
+}
+
+onMounted(async () => {
+    const pbGames = (await API.games.list(false, true)).games;
+    publicGames.value = (<Game[]>pbGames).filter(g => { 
+        return g.players.length >= 0 /* CHANGE HERE TO SHOW ONLY INTITIALIZATED GAMES (length = 1 instead of >= 0) */
+    });
+    await loadCurrentUser($promisedUser, currentUser);
 })
 </script>
 
 <template>
-    <h1>{{ APP_NAME }}</h1>
+    <div class="title">
+        <h1>{{ APP_NAME }}</h1>
+        <span class="sub-title">[BETA]</span>
+    </div>
     <div class="centered">
         <div class="content">
             <h2 class="write-code">Entrez un code :</h2>
@@ -40,15 +62,44 @@ onMounted(() => {
                 <button type="submit" @click="$event => getGame">Go !</button>
                 <button type="button">login/sign up</button>
             </div>
-            <p><u>Vous devez avoir un compte afin de créer une partie.</u></p> <br>
+            <div class="create-game" v-if="!currentUser">
+                <p><u>Vous devez avoir un compte afin de créer une partie.</u></p>
+            </div>
+            <div class="create-game" v-else>
+                <p>...ou créez votre partie publique/privée.</p>
+                <button @click="createGame">Nouvelle partie</button>
+            </div>
             <p>Bienvenue sur cette réplique du fameux jeu <u>Puissance 4</u>, connu pour sa simplicité, sans prise de tête. <br>
             Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
             parties et obtenant le plus de points sera l'élu du classement !</p>
             <h2>Parties publiques : </h2>
             <div class="games" v-if="publicGames.length > 0">
                 <div class="game" @click="$router.push(`/game/${game.id}`)" v-for="game in publicGames">
-                    <span class="g-id">{{ game.id }}</span>
-                    <span class="n-players">{{ game.players.length }}/2</span>
+                    <p>Partie <span class="g-id">#{{ game.id }}</span></p>
+                    <p class="created-by" v-if="game.owner">par 
+                        <tippy 
+                            placement="right"
+                            interactive
+                        >
+                            {{ game.owner.name }}
+                            <template #content>
+                                <div class="profile" style="display: flex; align-items: center; gap: 15px;">
+                                    <img 
+                                        :src="game.owner.avatar_url" 
+                                        alt="Avatar"
+                                        width="25"
+                                        height="25"
+                                        style="border-radius: 50%"
+                                    >
+                                    <div class="p-infos" style="display: flex; flex-direction: column;">
+                                        <span class="p-score">Score : {{ game.owner.score }}</span>
+                                        <router-link :to="`/p/${game.owner.id}`" style="color: var(--link-blue);">Voir le profil</router-link>
+                                    </div>
+                                </div>
+                            </template>
+                        </tippy>
+                    </p>
+                    <p class="created-by" v-else>par Invité</p>
                 </div>
             </div>
             <p v-else>Aucune partie publique n'est disponible :(</p>
@@ -61,16 +112,28 @@ p {
     text-align: center;
 }
 
-h1 {
+.title {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+}
+
+.title > h1 {
     font-family: 'Press Start 2P', cursive;
     color: var(--matrix-text);
     text-align: center;
-    margin-top: 1rem;
-    margin-bottom: 3rem;
     animation-duration: .8s;
     animation-name: blinking;
     animation-iteration-count: infinite;
     transition: none;
+}
+
+.title > .sub-title {
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    color: var(--error-text);
 }
 
 h2 {
@@ -179,12 +242,21 @@ h2 {
     border-radius: 5px;
     border: 2px solid transparent;
     transition: 0.5s;
+    cursor: pointer;
 }
 
 .content > .games > .game:hover {
     border: 2px solid var(--matrix-text);
 }
 
+.content > .games > .game > .created-by {
+    cursor: default;
+}
+
+.content > .games > .game > p > .g-id {
+    color: var(--color-small-text);
+    font-size: 13px;
+}
 
 /* ANIMATIONS */
 

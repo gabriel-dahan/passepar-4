@@ -129,9 +129,10 @@ class Games {
         this.endpoint = API_BASE + '/game';
     }
 
-    async new(public_: boolean) {
+    async new(public_: boolean, ownerId: string) {
         return __post(`${this.endpoint}/new`, {
-            public: public_
+            public: public_,
+            owner_id: ownerId
         }).then(res => res.json());
     }
 

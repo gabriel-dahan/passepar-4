@@ -23,7 +23,8 @@ interface Game {
     players: Player[],
     status: number,
     created_at: Date,
-    public: boolean
+    public: boolean,
+    owner: User
 }
 
 export type { User, Player, Game }

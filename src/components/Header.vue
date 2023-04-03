@@ -1,25 +1,7 @@
 <script setup lang="ts">
-import { API } from '@/assets/ts/api';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { APP_NAME } from '@/assets/ts/utils';
 
-let firstGame = ref('');
-
-const newGame = () => {
-    API.games.new(true).catch(err => console.error(err));
-}
-
-onMounted(() => {
-    API.games.list().then(data => {
-        if(data.games.length !== 0)
-            firstGame.value = data.games[0].id
-        else {
-            API.games.new(true).then(data => {
-                firstGame.value = data.game.id
-            });
-        }
-    });
-});
 </script>
 
 <template>
@@ -35,12 +17,6 @@ onMounted(() => {
                 </li>
                 <li>
                     <router-link to="/register">Register</router-link>
-                </li>
-                <li>
-                    <router-link :to="'/game/' + firstGame">Example Game</router-link>
-                </li>
-                <li>
-                    <button @click="newGame">New Public Game</button>
                 </li>
             </ul>
         </nav>

@@ -2,7 +2,7 @@
 import { onMounted, ref, inject } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { API } from '@/assets/ts/api';
+import { API, getRawErrs, updateErrs } from '@/assets/ts/api';
 import { matrixAsColumns } from '@/assets/ts/utils';
 
 import type { Game, User } from '@/assets/ts/interfaces';
@@ -15,6 +15,8 @@ const game = ref({} as Game);
 
 const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
 const currentUser = ref({} as User);
+
+const errors = ref(getRawErrs())
 /* ------------ */
 
 const loadCurrentUser = async () => {

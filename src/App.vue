@@ -1,16 +1,10 @@
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 import Header from '@/components/Header.vue';
 import Footer from '@/components/Footer.vue';
 import LoadingPage from './components/LoadingPage.vue';
 import Cursor from './components/Cursor.vue';
 import BackMusic from './components/BackMusic.vue';
-
-const currentUser = ref(null);
-
-
 </script>
 
 <script lang="ts">
@@ -23,7 +17,7 @@ Array.from(inputs).forEach(input => {
 <template>
     <LoadingPage></LoadingPage>
     <BackMusic></BackMusic>
-    <Cursor></Cursor>
+    <!--<Cursor></Cursor>-->
     <Header></Header>
     <main>
         <router-view />

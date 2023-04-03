@@ -1,4 +1,6 @@
 import { createApp } from 'vue'
+import VueTippy from 'vue-tippy';
+import 'tippy.js/dist/tippy.css'
 
 import App from './App.vue'
 import './assets/main.css'
@@ -9,6 +11,11 @@ import router from './routes'
 
 const app = createApp(App);
 app.use(router);
+app.use(VueTippy, {
+    defaultProps: { 
+        touch: 'hold' 
+    },
+});
 app.mount('#app');
 
 /* Get current logged user (using session token). */

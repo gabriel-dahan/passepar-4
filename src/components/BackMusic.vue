@@ -24,7 +24,7 @@ const playAudio = () => {
 
 button {
     z-index: 1;
-    position: absolute;
+    position: fixed;
     left: 20px;
     bottom: 20px;
     outline: none;
