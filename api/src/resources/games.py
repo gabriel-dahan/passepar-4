@@ -149,11 +149,23 @@ class NewGame(Resource):
         super().__init__()
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('public', type = bool, default = False, location = 'form')
+        self.parser.add_argument('owner_id', type = str, required = True, location = 'form')
 
     def post(self):
         args = self.parser.parse_args()
         public = args.get('public')
-        new_game = Game(public = public)
+        owner_id = args.get('owner_id')
+        if not User.query.filter_by(id = owner_id).first():
+            return jsonify({
+                'code': 'U2',
+                'message': f'Specified user (id: {owner_id}) does not exist.'
+            })
+        if Game.query.filter_by(created_by = owner_id).first():
+            return jsonify({
+                'code': 'G5',
+                'message': 'User is already the owner of another game.'
+            })
+        new_game = Game(public = public, created_by = owner_id)
         db.session.add(new_game)
         db.session.commit()
         return jsonify({

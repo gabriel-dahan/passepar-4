@@ -33,35 +33,8 @@ class Player(db.Model):
         return {
             'id': self.id,
             'color': self.color,
-            'user': self.user,
-            'game': self.game
-        }
-    
-@dataclass
-class User(db.Model):
-    __tablename__ = 'users'
-    __allow_unmapped__ = True
-
-    id: int = db.Column(db.String(10), default = user_uid, primary_key = True)
-    name: str = db.Column(db.String, nullable = False, unique = True)
-    email: str = db.Column(db.String, nullable = True, unique = True)
-    avatar_url: str = db.Column(db.String, nullable = False)
-    password: str = db.Column(db.String, nullable = False)
-    score: int = db.Column(db.Integer, default = 0, nullable = False)
-    
-    # RELATIONSHIPS
-    auth_tokens: List[AuthTokens] = db.relationship('AuthTokens', backref = 'user', lazy = True) # One-to-Many
-    player: Player = db.relationship('Player', backref = 'user', lazy = True, uselist = False) # One-to-One
-
-    def json_repr(self) -> dict:
-        return {
-            'id': self.id,
-            'name': self.name,
-            'avatar_url': self.avatar_url,
-            'email': self.email,
-            'anonymized_email': anonymize_email(self.email),
-            'score': self.score,
-            'auth_tokens': self.auth_tokens
+            'user_id': self.user_id,
+            'game_id': self.game_id
         }
 
 @dataclass
@@ -75,6 +48,7 @@ class Game(db.Model):
     status: int = db.Column(db.Integer, default = 0, nullable = False) # 1 if game started else 0 
     created_at: datetime = db.Column(db.DateTime, default = datetime.now(), nullable = False)
     public: bool = db.Column(db.Boolean, nullable = False)
+    created_by: bool = db.Column(db.String, db.ForeignKey('users.id'), nullable = False, unique = True)
 
     # RELATIONSHIP
     players: List[Player] = db.relationship('Player', backref = 'game', lazy = True)
@@ -87,5 +61,34 @@ class Game(db.Model):
             'players': self.players,
             'status': self.status,
             'created_at': self.created_at,
-            'public': self.public
+            'public': self.public,
+            'owner': self.owner.json_repr()
+        }
+    
+@dataclass
+class User(db.Model):
+    __tablename__ = 'users'
+    __allow_unmapped__ = True
+
+    id: int = db.Column(db.String(10), default = user_uid, primary_key = True)
+    name: str = db.Column(db.String, nullable = False, unique = True)
+    email: str = db.Column(db.String, nullable = True, unique = True)
+    avatar_url: str = db.Column(db.String, nullable = False)
+    password: str = db.Column(db.String, nullable = False)
+    score: int = db.Column(db.Integer, default = 0, nullable = False)
+
+    # RELATIONSHIPS
+    auth_tokens: List[AuthTokens] = db.relationship('AuthTokens', backref = 'user', lazy = True) # One-to-Many
+    player: Player = db.relationship('Player', backref = 'user', lazy = True, uselist = False) # One-to-One
+    owner_of: Game = db.relationship('Game', backref = 'owner', lazy = True, uselist = False) # One-to-One
+
+    def json_repr(self) -> dict:
+        return {
+            'id': self.id,
+            'name': self.name,
+            'avatar_url': self.avatar_url,
+            'email': self.email,
+            'anonymized_email': anonymize_email(self.email),
+            'score': self.score,
+            'auth_tokens': self.auth_tokens
         }

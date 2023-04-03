@@ -164,12 +164,12 @@ class GetUserSession(Resource):
 
     def get(self, sessiontoken: str) -> Response:
         t: AuthTokens = AuthTokens.query.filter_by(token = sessiontoken).first()
-        u: User = t.user
-        if not u:
+        if not t:
             return jsonify({
                 'code': 'U6',
                 'message': f'Session token \'{sessiontoken}\' is no longer valid.'
             })
+        u: User = t.user
         return jsonify(u.json_repr())
 
 class DeleteUserSession(Resource):
