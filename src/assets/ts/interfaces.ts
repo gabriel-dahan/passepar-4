@@ -10,6 +10,7 @@ interface Player {
 interface User {
     id: string,
     name: string,
+    short_name: string,
     avatar_url: string,
     email: string,
     anonymized_email: string,

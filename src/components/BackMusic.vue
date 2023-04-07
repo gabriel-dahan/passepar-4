@@ -14,7 +14,19 @@ const playAudio = () => {
 </script>
 
 <template>
-    <button id="songBtn" @click="playAudio">♪</button>
+    <div class="playBtn">
+        <tippy placement="right" interactive>
+            <button id="songBtn" @click="playAudio">♪</button>
+            <template #content>
+                <p style="width: max-content;">
+                    Crédits : 
+                    <a href="https://youtu.be/2-wKcIkElIc" target="_blank" style="color: var(--link-blue);">
+                        White Bat Audio<img src="@/assets/external-link.svg" alt="" width="13">
+                    </a>
+                </p>
+            </template>
+        </tippy>
+    </div>
     <audio id="backsong" loop>
         <source src="@/assets/backsong.mp3">
     </audio>
@@ -22,11 +34,14 @@ const playAudio = () => {
 
 <style scoped>
 
-button {
+.playBtn {
     z-index: 1;
     position: fixed;
     left: 20px;
     bottom: 20px;
+}
+
+button {
     outline: none;
     border: 2px transparent solid;
     border-radius: 5px;

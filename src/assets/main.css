@@ -25,3 +25,7 @@
 h2, p {
     font-family: 'Share Tech Mono', cursive;
 }
+
+.error-msg {
+    color: var(--error-text);
+}

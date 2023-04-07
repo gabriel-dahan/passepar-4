@@ -3,7 +3,7 @@ import { ref, onMounted, inject } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { APP_NAME, loadCurrentUser } from '@/assets/ts/utils';
-import { API } from '@/assets/ts/api';
+import { API, getRawErrs, updateErrs } from '@/assets/ts/api';
 import type { Game, User } from '@/assets/ts/interfaces';
 
 const router = useRouter();
@@ -15,26 +15,45 @@ let publicGames = ref([] as Game[]);
 
 const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
 const currentUser = ref({} as User);
-/* ------------ */
 
-// Err. codes
-let G2 = ref(false);
+const errors = ref({
+    ...getRawErrs(),
+    invalidGameId: false
+});
+/* ------------ */
 
 const getGame = () => {
     const gId = gameId.value;
-    API.games.get(gId).then(data => {
-        if (data.code !== 'G2')
-            router.push({ name: 'game', params: { gId } });
-        else
-            G2.value = true;
-    });
+    errors.value = {
+        ...getRawErrs(),
+        invalidGameId: false
+    };
+    if(!gId || gId.length !== 7) {
+        errors.value.invalidGameId = true;
+    } else {
+        API.games.get(gId)
+            .then(data => {
+                if(data?.id)
+                    router.push(`/game/${gId}`);
+                else if(data?.code)
+                    updateErrs(errors, data);
+            });
+    }
 }
 
 const createGame = () => {
     API.games.new(false, currentUser.value.id)
         .then(data => { 
-            let gId = data?.game.id;
-            router.push(`/game/${gId}`);
+            errors.value = {
+                ...getRawErrs(),
+                invalidGameId: false
+            };
+            if(data?.game) {
+                let gId = data?.game.id;
+                router.push(`/game/${gId}`);
+            }
+            else if(data && data.code)
+                updateErrs(errors, data);
         })
         .catch(err => console.error(err));
 }
@@ -57,33 +76,42 @@ onMounted(async () => {
         <div class="content">
             <h2 class="write-code">Entrez un code :</h2>
             <input v-model="gameId" placeholder="ex. : 4q04h92">
-            <p v-if="G2">Game with ID '{{ gameId }}' doesn't exist :(</p>
+            <p class="error-msg" v-if="errors.G2">La partie demandée n'existe pas :(</p>
+            <p class="error-msg" v-else-if="errors.invalidGameId">L'identifiant entré est incorrect...</p>
             <div class="btns">
-                <button type="submit" @click="$event => getGame">Go !</button>
-                <button type="button">login/sign up</button>
+                <button class="join-game" @click="$event => getGame()">GO !</button>
+                <button class="login-or-register" onclick="alert('hello')">login/sign up</button>
             </div>
             <div class="create-game" v-if="!currentUser">
                 <p><u>Vous devez avoir un compte afin de créer une partie.</u></p>
             </div>
             <div class="create-game" v-else>
                 <p>...ou créez votre partie publique/privée.</p>
-                <button @click="createGame">Nouvelle partie</button>
+                <button class="new-game" @click="createGame">Nouvelle partie</button>
+                <p class="error-msg" v-if="errors.G5">Vous êtes déjà hôte d'une autre partie.</p>
             </div>
-            <p>Bienvenue sur cette réplique du fameux jeu <u>Puissance 4</u>, connu pour sa simplicité, sans prise de tête. <br>
+            <p>Bienvenue sur cette réplique du fameux jeu <tippy interactive>
+                <u>Puissance 4</u>
+                <template #content>
+                    Voir <a href="https://fr.wikipedia.org/wiki/Puissance_4" target="_blank" style="color: var(--link-blue);">
+                        ici<img src="@/assets/external-link.svg" alt="" width="13">
+                    </a>
+                </template>
+            </tippy>, connu pour sa simplicité, sans prise de tête. <br>
             Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
             parties et obtenant le plus de points sera l'élu du classement !</p>
             <h2>Parties publiques : </h2>
             <div class="games" v-if="publicGames.length > 0">
                 <div class="game" @click="$router.push(`/game/${game.id}`)" v-for="game in publicGames">
-                    <p>Partie <span class="g-id">#{{ game.id }}</span></p>
-                    <p class="created-by" v-if="game.owner">par 
+                    <p>Partie <span class="g-id">#{{ game.id }}</span></p> 
+                        <p class="created-by" v-if="game.owner"> par 
                         <tippy 
                             placement="right"
                             interactive
                         >
-                            {{ game.owner.name }}
+                            <p class="game-owner">{{ game.owner.short_name }}</p>
                             <template #content>
-                                <div class="profile" style="display: flex; align-items: center; gap: 15px;">
+                                <div class="profile" style="display: flex; align-items: center; gap: 15px; width: max-content;">
                                     <img 
                                         :src="game.owner.avatar_url" 
                                         alt="Avatar"
@@ -92,8 +120,8 @@ onMounted(async () => {
                                         style="border-radius: 50%"
                                     >
                                     <div class="p-infos" style="display: flex; flex-direction: column;">
+                                        <router-link :to="`/p/${game.owner.id}`" style="color: var(--link-blue);" @click.stop>{{ game.owner.name }}</router-link>
                                         <span class="p-score">Score : {{ game.owner.score }}</span>
-                                        <router-link :to="`/p/${game.owner.id}`" style="color: var(--link-blue);">Voir le profil</router-link>
                                     </div>
                                 </div>
                             </template>
@@ -154,6 +182,30 @@ h2 {
     max-width: 550px;
 }
 
+.centered > .content > .create-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.centered > .content > .create-game > .new-game {
+    outline: none;
+    margin: 10px 0;
+    padding: 5px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Share Tech Mono', cursive;
+    font-size: 14px;
+    color: var(--matrix-text);
+    background-color: transparent;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.centered > .content > .create-game > .new-game:hover {
+    transform: scale(1.1);
+}
+
 .content > input {
     outline: none;
     padding: 5px;
@@ -203,24 +255,24 @@ h2 {
     transition-duration: 0.4s;
 }
 
-.content > .btns > button[type='submit'] {
+.content > .btns > button.join-game {
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
 }
 
-.content > .btns > button[type='submit']:hover {
+.content > .btns > button.join-game:hover {
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);
 }
 
-.content > .btns > button[type='button'] {
+.content > .btns > button.login-or-register {
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);
 }
 
-.content > .btns > button[type='button']:hover {
+.content > .btns > button.login-or-register:hover {
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
     color: #000;
@@ -237,6 +289,10 @@ h2 {
 .content > .games > .game {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 80px;
     background-color: var(--color-background-darker);
     padding: 10px;
     border-radius: 5px;
@@ -250,7 +306,17 @@ h2 {
 }
 
 .content > .games > .game > .created-by {
+    display: flex;
+    gap: 10px;
     cursor: default;
+}
+
+.content > .games > .game > .created-by .game-owner {
+    transition: 0.3s;
+}
+
+.content > .games > .game > .created-by:hover .game-owner {
+    color: #fff;
 }
 
 .content > .games > .game > p > .g-id {
