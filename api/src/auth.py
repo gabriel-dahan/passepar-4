@@ -21,7 +21,7 @@ class AuthTokens(db.Model):
     def json_repr(self) -> dict:
         return {
             'token': self.token,
-            'logged_on': self.logged_on,
+            'logged_on': str(self.logged_on),
             'period': self.period,
-            'user': self.user
+            'user_id': self.user_id
         }

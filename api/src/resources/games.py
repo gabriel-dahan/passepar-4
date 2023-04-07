@@ -1,14 +1,12 @@
 from flask import jsonify, Response
 from flask_restful import Resource, request, reqparse
 
-from typing import Union
-
-from .. import api, db
+from .. import api, db, socket, app
 from ..models import Game, Player, User
 from ..core import GameCore
 from ..etc import linear_as_int_grid, int_grid_as_linear
 
-# --- GAME API --- #
+# --- GAME API & RESOURCES --- #
 
 class AddPlayer(Resource):
 
@@ -58,6 +56,7 @@ class AddPlayer(Resource):
         game.players.append(player)
         db.session.commit()
         return jsonify({
+            'game': game.json_repr(),
             'message': f'Player \'{user_id}\' was successfuly added to game \'{game.id}\'.'
         })
 
@@ -69,7 +68,7 @@ class GameChange(Resource):
         self.parser.add_argument('column', type = int, required = True, location = 'form')
 
     def put(self, gamekey: str):
-        game = Game.query.filter_by(id = gamekey).first()
+        game: Game = Game.query.filter_by(id = gamekey).first()
         args = self.parser.parse_args()
         column = args.get('column')
         if column < 0 or column > 6:
@@ -96,6 +95,7 @@ class GameChange(Resource):
         game.turn = game.turn % 2 + 1 # Returns 1 or 2 - the modulo basically switches players from 1 to 2 or from 2 to 1 for the next round.
         db.session.commit()
         return jsonify({
+            'game': game.json_repr(),
             'message': 'The game was successfuly updated.'
         })
 
@@ -103,6 +103,7 @@ class GameDeletion(Resource):
 
     def delete(self, gamekey: str):
         game: Game = Game.query.filter_by(id = gamekey).first()
+        grepr = game.json_repr()
         if not game:
             return jsonify({
                 'code': 'G2',
@@ -112,7 +113,7 @@ class GameDeletion(Resource):
         db.session.commit()
         return jsonify({
             'message': f'The game with id \'{gamekey}\' was successfuly deleted.',
-            'game': game.json_repr()
+            'game': grepr
         })
 
 class GameInfo(Resource):
@@ -173,7 +174,6 @@ class NewGame(Resource):
             'game': new_game.json_repr()
         })
 
-# -- RESOURCES -- #
 root = '/api/game'
 api.add_resource(AddPlayer, f'{root}/<string:gamekey>/addplayer')
 api.add_resource(GameChange, f'{root}/<string:gamekey>/play')
@@ -181,3 +181,30 @@ api.add_resource(GameDeletion, f'{root}/<string:gamekey>/delete')
 api.add_resource(GameInfo, f'{root}/<string:gamekey>')
 api.add_resource(GamesList, f'{root}/list')
 api.add_resource(NewGame, f'{root}/new')
+
+# --- Game WEBSOCKET --- #
+
+from flask_socketio import Namespace, emit, join_room, leave_room, rooms
+
+class GameWS(Namespace):
+    def on_connect(self):
+        pass
+
+    def on_disconnect(self):
+        pass
+
+    # Joins the room but not the game itself
+    def on_room_join(self, data):
+        room = data['room_id']
+        join_room(room)
+        emit('room_join', room, to = room)
+
+    # Joins the game and becomes a player
+    def on_game_join(self, room_id: str):
+        new_data: Game = Game.query.filter_by(id = room_id).first()
+        emit('new_data', new_data.json_repr(), to = room_id, broadcast = True)
+    
+    def on_redirect(self, route):
+        emit('redirect', to = route, broadcast = True)
+
+socket.on_namespace(GameWS('/game'))

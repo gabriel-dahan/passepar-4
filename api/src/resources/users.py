@@ -181,6 +181,7 @@ class DeleteUserSession(Resource):
                 'code': 'U6',
                 'message': f'Session with token \'{sessiontoken}\' does not exist.'
             })
+        session.user.auth_tokens.remove(session)
         db.session.delete(session)
         db.session.commit()
         return jsonify({

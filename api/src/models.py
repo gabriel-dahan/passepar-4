@@ -2,6 +2,7 @@ from . import db
 from .etc import anonymize_email, linear_as_int_grid, rand_uid
 from .auth import AuthTokens
 
+from sqlalchemy.orm import backref
 from dataclasses import dataclass
 from typing import List
 from datetime import datetime
@@ -33,7 +34,7 @@ class Player(db.Model):
         return {
             'id': self.id,
             'color': self.color,
-            'user_id': self.user_id,
+            'user': self.user.json_repr() if self.user else None,
             'game_id': self.game_id
         }
 
@@ -51,16 +52,16 @@ class Game(db.Model):
     created_by: bool = db.Column(db.String, db.ForeignKey('users.id'), nullable = False, unique = True)
 
     # RELATIONSHIP
-    players: List[Player] = db.relationship('Player', backref = 'game', lazy = True)
+    players: List[Player] = db.relationship('Player', backref = 'game', lazy = True, cascade = 'all, delete-orphan')
 
     def json_repr(self) -> dict:
         return {
             'id': self.id,
             'matrix': linear_as_int_grid(self.matrix),
             'turn': self.turn,
-            'players': self.players,
+            'players': [p.json_repr() for p in self.players],
             'status': self.status,
-            'created_at': self.created_at,
+            'created_at': str(self.created_at),
             'public': self.public,
             'owner': self.owner.json_repr()
         }
@@ -86,9 +87,10 @@ class User(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'short_name': f'{self.name[:5]}...' if len(self.name) > 8 else self.name,
             'avatar_url': self.avatar_url,
             'email': self.email,
             'anonymized_email': anonymize_email(self.email),
             'score': self.score,
-            'auth_tokens': self.auth_tokens
+            'auth_tokens': [auth_token.json_repr() for auth_token in self.auth_tokens]
         }
