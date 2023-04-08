@@ -49,12 +49,16 @@ const initializeWSEvents = () => {
     });
 
     $socket.on('new_data', (new_game) => {
+        // Changes the game data's matrix to make it easier to manipulate in game.
+        new_game.matrix = matrixAsColumns(new_game.matrix); 
         game.value = new_game;
     });
 
+    /* Handles connection to the game room : 
     $socket.on('room_join', (room) => {
-        console.log(`--- Connected - ${room} ---`)
+        
     });
+    */
 };
 
 onMounted(async () => {
@@ -65,7 +69,6 @@ onMounted(async () => {
 
 onBeforeRouteLeave((to, from, next) => {
     $socket.disconnect();
-    console.log(`--- Disconnected - ${game.value.id} ---`)
     next();
 });
 
@@ -82,7 +85,7 @@ const isPlayer = (userId: string) => {
 
 const deleteGame = () => {
     API.games.delete(id).then(data => {
-        $socket.emit('redirect', '/');
+        $socket.emit('redirect', '/', game.value.id);
     });
 }
 
@@ -93,11 +96,15 @@ const joinGame = (color: number) => {
             errors.value = getRawErrs();
 
             if(data?.game)
-                $socket.emit('game_join', game.value.id)
+                $socket.emit('game_join', game.value.id);
             else if(data?.code)
-                updateErrs(errors, data)
+                updateErrs(errors, data);
         });
 };
+
+const launchGame = () => {
+    $socket.emit('launch_game', game.value.id);
+}
 
 /* ---------------- */ 
 
@@ -105,65 +112,93 @@ const joinGame = (color: number) => {
 /* --- GAME --- */ 
 
 const play = (column: number) => {
-    API.games.play(id, String(column))
-        .then(data => {
-            loadGameData(); // Reloads the game's data.
-
-            if(data.code && data.code === 'G3') {
-                alert(`Column ${column + 1} is full.`) // Testing purposes.
-            }
-        })
-        .catch(error => console.error(error));
+    if(currentUser.value.id === game.value.players[game.value.turn - 1].user.id) {
+        API.games.play(game.value.id, String(column))
+            .then(data => {
+                $socket.emit('play', game.value.id);
+                if(data.code && data.code === 'G3') {
+                    alert(`Column ${column + 1} is full.`) // Testing purposes.
+                }
+            })
+            .catch(error => console.error(error));
+    }
 };
+
+const showCell = (e: Event, column: number) => {
+    // Doit afficher un faux pion a moitié transparent pour que l'utilisateur sache ou placer son prochain pion
+}
 
 /* ------------ */ 
 </script>
 
 <template>
-    <p class="guest-not-supported" v-if="!currentUser">Les utilisateurs invités ne sont pas encore supportés.</p>
-    <!-- PRE-GAME SCREEN -->
-    <div class="pre-game" v-else-if="game.id && game.status === 0">
+    <div class="game-room">
         <p class="privacy public" v-if="game.public">Partie publique</p>
         <p class="privacy private" v-else>Partie privée</p>
-        <button class="delete-game" @click="deleteGame" v-if="currentUser?.id === game.owner.id && game.players.length < 2">Supprimer la partie ?</button>
-        <div class="main-content">
-            <h1 class="game-title">Partie #{{ game.id }}</h1>
-            <p class="players-count">Joueurs : <tippy placement="right" interactive>
-                <span>{{ game.players.length }}/2</span>
-                <template #content>
-                    <div class="players" style="display: flex; flex-direction: column;" v-if="game.players.length > 0">
-                        <span v-for="player in game.players">{{ player.user ? player.user.name : 'Invité' }} {{ player.user.id === game.owner.id ? '(hôte)' : '' }}</span>
+        
+        <p class="guest-not-supported" v-if="!currentUser">Les utilisateurs invités ne sont pas encore supportés.</p>
+        <!-- PRE-GAME SCREEN -->
+        <div class="pre-game" v-else-if="game.id && game.status === 0">
+            <button class="delete-game" @click="deleteGame" v-if="currentUser?.id === game.owner.id && game.players.length < 2">Supprimer la partie ?</button>
+            <div class="main-content">
+                <h1 class="game-title">Partie #{{ game.id }}</h1>
+                <p class="players-count">Joueurs : <tippy placement="right" interactive>
+                    <span>{{ game.players.length }}/2</span>
+                    <template #content>
+                        <div class="players" style="display: flex; flex-direction: column;" v-if="game.players.length > 0">
+                            <span v-for="player in game.players">{{ player.user ? player.user.name : 'Invité' }} {{ player.user.id === game.owner.id ? '(hôte)' : '' }}</span>
+                        </div>
+                        <div v-else>
+                            <span>Aucun joueur</span>
+                        </div>
+                    </template>
+                </tippy></p>
+                <div class="pill-choice" v-if="game.players.length === 0 && currentUser.id === game.owner.id">
+                    <p>Choisissez la pilule de votre choix...</p>
+                    <div class="pills">
+                        <img @click="joinGame(0)" src="@/assets/choices_left.png" alt="Red Pill">
+                        <img @click="joinGame(1)" src="@/assets/choices_right.png" alt="Blue Pill">
                     </div>
-                    <div v-else>
-                        <span>Aucun joueur</span>
-                    </div>
-                </template>
-            </tippy></p>
-            <div class="pill-choice" v-if="game.players.length === 0 && currentUser.id === game.owner.id">
-                <p>Choisissez la pilule de votre choix...</p>
-                <div class="pills">
-                    <img @click="joinGame(0)" src="@/assets/choices_left.png" alt="Red Pill">
-                    <img @click="joinGame(1)" src="@/assets/choices_right.png" alt="Blue Pill">
+                    <p class="error-msg" v-if="errors.G5">Finissez la partie en cours avant d'en rejoindre une nouvelle.</p>
                 </div>
-                <p class="error-msg" v-if="errors.G5">Finissez la partie en cours avant d'en rejoindre une nouvelle.</p>
+                <div class="pill-choice" v-else-if="game.players.length === 0">
+                    <p>Attendez que l'hôte choisisse sa couleur.</p>
+                </div>
+                <div class="game-join" v-else-if="game.players.length === 1 && !isPlayer(currentUser?.id)">
+                    <p>Il ne manque que vous !</p>
+                    <button class="start-game" @click="joinGame((game.players[0].color + 1) % 2)">Cliquez ici pour rejoindre la partie</button>
+                    <p>Attention, c'est un point de non retour...</p>
+                </div>
+                <div class="game-join" v-else-if="game.players.length === 1">
+                    <p>Attendez qu'un autre joueur rejoigne la partie...</p>
+                </div>
+                <div class="wait-room" v-else-if="game.players.length === 2 && game.status === 0 && game.owner.id === currentUser.id">
+                    <button @click="launchGame">Lancer la partie ?</button>
+                </div>
+                <div v-else-if="game.players.length === 2 && game.status === 0 && isPlayer(currentUser.id)">
+                    <p>Attendez que l'hôte lance la partie...</p>
+                </div>
             </div>
-            <div class="pill-choice" v-else-if="game.players.length === 0">
-                <p>Attendez que l'hôte choisisse sa couleur.</p>
+        </div>
+
+        <!-- STARTED GAME -->
+        <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1">
+            <p>Tour : {{ game.players[game.turn - 1].user.name }}</p>
+            <div id="grid">
+                <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
+                <div :class="'column-' + (index - 1)" @click="play(index - 1)" @mouseover="showCell($event, index - 1)" v-for="index in game.matrix.length">
+                    <div class="cells" @mouseover.capture>
+                        <div class="cell" v-for="cell in game.matrix[index - 1]">
+                            <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
+                            <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 2">
+                            <img src="@/assets/void.svg" alt="NP" v-else>
+                        </div>
+                    </div>
+                    <hr width="90%">
+                    <span class="col-num">{{ index }}</span>
+                </div>
             </div>
-            <div class="game-join" v-else-if="game.players.length === 1 && !isPlayer(currentUser?.id)">
-                <p>Il ne manque que vous !</p>
-                <button class="start-game" @click="joinGame((game.players[0].color + 1) % 2)">Cliquez ici pour rejoindre la partie</button>
-                <p>Attention, c'est un point de non retour...</p>
-            </div>
-            <div class="game-join" v-else-if="game.players.length === 1">
-                <p>Attendez qu'un autre joueur rejoigne la partie...</p>
-            </div>
-            <div class="wait-room" v-else-if="game.players.length === 2 && game.status === 0 && game.owner.id === currentUser.id">
-                <button>Lancer la partie ?</button>
-            </div>
-            <div class="wait-room" v-else>
-                <p>Attendez que l'hôte lance la partie...</p>
-            </div>
+            <p>Partie #{{ game.id }}</p>
         </div>
         <p class="connected-as" v-if="!currentUser">
             Vous jouez en tant qu'invité.
@@ -172,28 +207,16 @@ const play = (column: number) => {
             Vous jouez en tant que <span class="username">{{ currentUser.name }}</span>
         </p>
     </div>
-
-    <!-- STARTED GAME -->
-    <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1">
-        <div id="grid">
-            <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
-            <div :class="'column-' + (index - 1)" @click="play(index - 1)" v-for="index in game.matrix.length">
-                <div class="cells">
-                    <div class="cell" v-for="cell in game.matrix[index - 1]">
-                        <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
-                        <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 2">
-                        <img src="@/assets/void.svg" alt="NP" v-else>
-                    </div>
-                </div>
-                <hr width="90%">
-                <span class="col-num">{{ index }}</span>
-            </div>
-        </div>
-        <p>Partie #{{ game.id }}</p>
-    </div>
 </template>
 
 <style scoped>
+.game-room {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+}
+
 .pre-game,
 .pre-game > .main-content,
 .game {
@@ -203,6 +226,19 @@ const play = (column: number) => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.privacy {
+    color: var(--color-text);
+    padding: 0 7px;
+    border-radius: 10px;
+}
+.privacy.public {
+    border: 1px solid #297373;
+}
+
+.privacy.private {
+    border: 1px solid #EE2E31;
 }
 
 .pre-game > .delete-game {
@@ -227,20 +263,6 @@ const play = (column: number) => {
 .pre-game p {
     font-family: 'Share Tech Mono', cursive;
     text-align: center;
-}
-
-.pre-game > .privacy {
-    color: var(--color-text);
-    padding: 0 7px;
-    border-radius: 10px;
-}
-
-.pre-game > .privacy.public {
-    border: 1px solid #297373;
-}
-
-.pre-game > .privacy.private {
-    border: 1px solid #EE2E31;
 }
 
 .pre-game > .main-content > .game-title {
@@ -285,14 +307,18 @@ const play = (column: number) => {
     transform: scale(1.2);
 }
 
-.pre-game > .connected-as {
+.connected-as {
     color: var(--color-small-text);
     font-size: 14px;
     margin-bottom: 10px;
 }
 
-.pre-game > .connected-as > .username {
+.connected-as > .username {
     color: var(--matrix-text);
+}
+
+.game {
+    gap: 30px;
 }
 
 .game > #grid {

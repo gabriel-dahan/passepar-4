@@ -20,7 +20,7 @@ interface User {
 interface Game {
     id: string,
     matrix: number[][],
-    turn: boolean,
+    turn: number,
     players: Player[],
     status: number,
     created_at: Date,

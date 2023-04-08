@@ -26,6 +26,15 @@ h2, p {
     font-family: 'Share Tech Mono', cursive;
 }
 
+a {
+    color: var(--link-blue);
+    transition: 0.3s;
+}
+
+a:hover {
+    color: var(--link-blue-hover)
+}
+
 .error-msg {
     color: var(--error-text);
 }

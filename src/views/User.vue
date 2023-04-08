@@ -36,8 +36,17 @@ onMounted(async () => {
 </script>
 
 <template>
-    <p>User {{ user.id }} - {{ user.name }}</p>
+    <p>Utilisateur <span class="username">{{ user.name }}</span> <small>(#{{ user.id }})</small></p>
+    <p>Score : <span class="score">{{ user.score }}</span></p>
     <button @click="disconnectUser" v-if="currentUser && currentUser.id === user.id">Se déconnecter</button>
 </template>
 
-<style scoped></style>
+<style scoped>
+.username {
+    color: var(--matrix-text);
+}
+
+.score {
+    color: #fff;
+}
+</style>

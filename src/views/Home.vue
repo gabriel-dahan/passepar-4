@@ -70,67 +70,76 @@ onMounted(async () => {
 <template>
     <div class="title">
         <h1>{{ APP_NAME }}</h1>
-        <span class="sub-title">[BETA]</span>
+        <tippy placement="bottom" interactive>
+            <span class="sub-title">[BETA]</span>
+            <template #content>
+                <p>Suggestion/bug ? <a href="https://mail.google.com/mail/u/0/#inbox?compose=new" target="_blank">work@gabrieldahan.me</a></p>
+            </template>
+        </tippy>
     </div>
     <div class="centered">
         <div class="content">
-            <h2 class="write-code">Entrez un code :</h2>
-            <input v-model="gameId" placeholder="ex. : 4q04h92">
-            <p class="error-msg" v-if="errors.G2">La partie demandée n'existe pas :(</p>
-            <p class="error-msg" v-else-if="errors.invalidGameId">L'identifiant entré est incorrect...</p>
-            <div class="btns">
-                <button class="join-game" @click="$event => getGame()">GO !</button>
-                <button class="login-or-register" onclick="alert('hello')">login/sign up</button>
-            </div>
-            <div class="create-game" v-if="!currentUser">
-                <p><u>Vous devez avoir un compte afin de créer une partie.</u></p>
-            </div>
-            <div class="create-game" v-else>
-                <p>...ou créez votre partie publique/privée.</p>
-                <button class="new-game" @click="createGame">Nouvelle partie</button>
-                <p class="error-msg" v-if="errors.G5">Vous êtes déjà hôte d'une autre partie.</p>
-            </div>
-            <p>Bienvenue sur cette réplique du fameux jeu <tippy interactive>
-                <u>Puissance 4</u>
-                <template #content>
-                    Voir <a href="https://fr.wikipedia.org/wiki/Puissance_4" target="_blank" style="color: var(--link-blue);">
-                        ici<img src="@/assets/external-link.svg" alt="" width="13">
-                    </a>
-                </template>
-            </tippy>, connu pour sa simplicité, sans prise de tête. <br>
-            Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
-            parties et obtenant le plus de points sera l'élu du classement !</p>
-            <h2>Parties publiques : </h2>
-            <div class="games" v-if="publicGames.length > 0">
-                <div class="game" @click="$router.push(`/game/${game.id}`)" v-for="game in publicGames">
-                    <p>Partie <span class="g-id">#{{ game.id }}</span></p> 
-                        <p class="created-by" v-if="game.owner"> par 
-                        <tippy 
-                            placement="right"
-                            interactive
-                        >
-                            <p class="game-owner">{{ game.owner.short_name }}</p>
-                            <template #content>
-                                <div class="profile" style="display: flex; align-items: center; gap: 15px; width: max-content;">
-                                    <img 
-                                        :src="game.owner.avatar_url" 
-                                        alt="Avatar"
-                                        width="25"
-                                        height="25"
-                                        style="border-radius: 50%"
-                                    >
-                                    <div class="p-infos" style="display: flex; flex-direction: column;">
-                                        <router-link :to="`/p/${game.owner.id}`" style="color: var(--link-blue);" @click.stop>{{ game.owner.name }}</router-link>
-                                        <span class="p-score">Score : {{ game.owner.score }}</span>
-                                    </div>
-                                </div>
-                            </template>
-                        </tippy>
-                    </p>
-                    <p class="created-by" v-else>par Invité</p>
+            <section class="general">
+                <h2 class="write-code">Entrez un code :</h2>
+                <input v-model="gameId" placeholder="ex. : 4q04h92">
+                <p class="error-msg" v-if="errors.G2">La partie demandée n'existe pas :(</p>
+                <p class="error-msg" v-else-if="errors.invalidGameId">L'identifiant entré est incorrect...</p>
+                <div class="btns">
+                    <button class="join-game" @click="$event => getGame()">GO !</button>
+                    <button class="login-or-register" onclick="alert('hello')">login/sign up</button>
                 </div>
-            </div>
-            <p v-else>Aucune partie publique n'est disponible :(</p>
+                <div class="create-game" v-if="!currentUser">
+                    <p><u>Vous devez avoir un compte afin de créer une partie.</u></p>
+                </div>
+                <div class="create-game" v-else>
+                    <p>...ou créez votre partie publique/privée.</p>
+                    <button class="new-game" @click="createGame">Nouvelle partie</button>
+                    <p class="error-msg" v-if="errors.G5">Vous êtes déjà hôte d'une autre partie.</p>
+                </div>
+                <p>Bienvenue sur cette réplique du fameux jeu <tippy interactive>
+                    <u>Puissance 4</u>
+                    <template #content>
+                        Voir <a href="https://fr.wikipedia.org/wiki/Puissance_4" target="_blank" style="color: var(--link-blue);">
+                            ici<img src="@/assets/external-link.svg" alt="" width="13">
+                        </a>
+                    </template>
+                </tippy>, connu pour sa simplicité, sans prise de tête. <br>
+                Ici, on préfère la prise de tête, raison pour laquelle on introduit avec cette reproduction un système compétitif, où celui gagnant le plus de 
+                parties et obtenant le plus de points sera l'élu du classement !</p>
+            </section>
+            <section class="public-games">
+            <h2>Parties publiques : </h2>
+                <div class="games" v-if="publicGames.length > 0">
+                    <div class="game" @click="$router.push(`/game/${game.id}`)" v-for="game in publicGames">
+                        <p>Partie <span class="g-id">#{{ game.id }}</span></p> 
+                            <p class="created-by" v-if="game.owner"> par 
+                            <tippy 
+                                placement="right"
+                                interactive
+                            >
+                                <p class="game-owner">{{ game.owner.short_name }}</p>
+                                <template #content>
+                                    <div class="profile" style="display: flex; align-items: center; gap: 15px; width: max-content;">
+                                        <img 
+                                            :src="game.owner.avatar_url" 
+                                            alt="Avatar"
+                                            width="25"
+                                            height="25"
+                                            style="border-radius: 50%"
+                                        >
+                                        <div class="p-infos" style="display: flex; flex-direction: column;">
+                                            <router-link :to="`/p/${game.owner.id}`" style="color: var(--link-blue);" @click.stop>{{ game.owner.name }}</router-link>
+                                            <span class="p-score">Score : {{ game.owner.score }}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </tippy>
+                        </p>
+                        <p class="created-by" v-else>par Invité</p>
+                    </div>
+                </div>
+                <p v-else>Aucune partie publique n'est disponible :(</p>
+            </section>
         </div>
     </div>
 </template>
@@ -157,15 +166,18 @@ p {
     transition: none;
 }
 
-.title > .sub-title {
+.title > span {
     text-align: center;
+}
+
+.title > span > .sub-title {
     font-family: 'Press Start 2P', cursive;
     font-size: 12px;
     color: var(--error-text);
 }
 
 h2 {
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .centered {
@@ -174,21 +186,28 @@ h2 {
     align-items: center;
 }
 
-.centered > .content {
+.content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 35px;
     max-width: 550px;
 }
 
-.centered > .content > .create-game {
+.content > .general {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.content > .general > .create-game {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.centered > .content > .create-game > .new-game {
+.content > .general > .create-game > .new-game {
     outline: none;
     margin: 10px 0;
     padding: 5px;
@@ -202,11 +221,11 @@ h2 {
     cursor: pointer;
 }
 
-.centered > .content > .create-game > .new-game:hover {
+.content > .general > .create-game > .new-game:hover {
     transform: scale(1.1);
 }
 
-.content > input {
+.content > .general > input {
     outline: none;
     padding: 5px;
     border: 1px var(--matrix-text) solid;
@@ -217,7 +236,7 @@ h2 {
     background-color: rgb(31, 31, 31);
 }
 
-.content > ::placeholder {
+.content > .general > ::placeholder {
     font-family: 'Share Tech Mono', cursive;
     color: var(--text-color);
 }
@@ -227,26 +246,26 @@ h2 {
     text-align: center;
 }
 
-.content > .write-code {
+.content > .general > .write-code {
     overflow: hidden;
     white-space: nowrap;
     width: 16ch;
     animation: typing 4s steps(16, end);
 }
 
-.content > input[type=text] {
+.content > .general > input[type=text] {
     background-color: var(--color-background);
     opacity: 0;
     color: var(--matrix-text);
     outline: none;
 }
 
-.content > .btns {
+.content > .general > .btns {
     display: flex;
     gap: 5px;
 }
 
-.content > .btns > button {
+.content > .general > .btns > button {
     font-family: 'Share Tech Mono', cursive;
     padding: 10px 20px;
     border-radius: 8px;
@@ -255,30 +274,37 @@ h2 {
     transition-duration: 0.4s;
 }
 
-.content > .btns > button.join-game {
+.content > .general > .btns > button.join-game {
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
 }
 
-.content > .btns > button.join-game:hover {
+.content > .general > .btns > button.join-game:hover {
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);
 }
 
-.content > .btns > button.login-or-register {
+.content > .general > .btns > button.login-or-register {
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);
 }
 
-.content > .btns > button.login-or-register:hover {
+.content > .general > .btns > button.login-or-register:hover {
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
     color: #000;
 }
 
-.content > .games {
+.content > .public-games {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.content > .public-games > .games {
     max-width: 550px;
     display: flex;
     gap: 20px;
@@ -286,7 +312,7 @@ h2 {
     justify-content: center;
 }
 
-.content > .games > .game {
+.content > .public-games > .games > .game {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -301,25 +327,25 @@ h2 {
     cursor: pointer;
 }
 
-.content > .games > .game:hover {
+.content > .public-games > .games > .game:hover {
     border: 2px solid var(--matrix-text);
 }
 
-.content > .games > .game > .created-by {
+.content > .public-games > .games > .game > .created-by {
     display: flex;
     gap: 10px;
     cursor: default;
 }
 
-.content > .games > .game > .created-by .game-owner {
+.content > .public-games > .games > .game > .created-by .game-owner {
     transition: 0.3s;
 }
 
-.content > .games > .game > .created-by:hover .game-owner {
+.content > .public-games > .games > .game > .created-by .game-owner:hover {
     color: #fff;
 }
 
-.content > .games > .game > p > .g-id {
+.content > .public-games > .games > .game > p > .g-id {
     color: var(--color-small-text);
     font-size: 13px;
 }

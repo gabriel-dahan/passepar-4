@@ -11,6 +11,7 @@
     --vt-c-indigo: #2c3e50;
 
     --vt-c-flashy-green: #39F63B;
+    --vt-c-flashy-green-soft: rgb(29, 207, 32);
     --vt-c-soft-red: #e97171;
     --vt-c-soft-blue-1: #71a5e9;
     --vt-c-soft-blue-2: rgb(84, 143, 219);
@@ -41,6 +42,7 @@
     --color-text: var(--vt-c-text-dark-2);
     --color-small-text: var(--vt-c-text-dark-3);
     --matrix-text: var(--vt-c-flashy-green);
+    --matrix-text-softer: var(--vt-c-flashy-green-soft);
     --error-text: var(--vt-c-soft-red);
 
     --link-blue: var(--vt-c-soft-blue-1);

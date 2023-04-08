@@ -51,10 +51,10 @@ button {
 }
 
 button:hover {
-    background-color: #1ec572;
+    background-color: var(--matrix-text-softer);
 }
 
 button.playing:not(:hover) {
-    background: #31f593;
+    background: var(--matrix-text);
 }
 </style>
