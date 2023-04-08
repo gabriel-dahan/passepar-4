@@ -103,12 +103,12 @@ class GameDeletion(Resource):
 
     def delete(self, gamekey: str):
         game: Game = Game.query.filter_by(id = gamekey).first()
-        grepr = game.json_repr()
         if not game:
             return jsonify({
                 'code': 'G2',
                 'message': f'Game with id \'{gamekey}\' does not exist.'
             })
+        grepr = game.json_repr()
         db.session.delete(game)
         db.session.commit()
         return jsonify({
@@ -203,8 +203,18 @@ class GameWS(Namespace):
     def on_game_join(self, room_id: str):
         new_data: Game = Game.query.filter_by(id = room_id).first()
         emit('new_data', new_data.json_repr(), to = room_id, broadcast = True)
+
+    def on_launch_game(self, room_id: str):
+        room: Game = Game.query.filter_by(id = room_id).first()
+        room.status = 1
+        db.session.commit()
+        emit('new_data', room.json_repr(), to = room_id, broadcast = True)
+
+    def on_play(self, room_id: str):
+        room: Game = Game.query.filter_by(id = room_id).first()
+        emit('new_data', room.json_repr(), to = room_id, broadcast = True)
     
-    def on_redirect(self, route):
-        emit('redirect', to = route, broadcast = True)
+    def on_redirect(self, route: str, room: str):
+        emit('redirect', route, to = room, broadcast = True)
 
 socket.on_namespace(GameWS('/game'))
