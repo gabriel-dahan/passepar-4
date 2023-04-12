@@ -14,7 +14,8 @@ interface User {
     avatar_url: string,
     email: string,
     anonymized_email: string,
-    score: number
+    score: number,
+    game_id: string
 }
 
 interface Game {

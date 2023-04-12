@@ -86,10 +86,13 @@ onMounted(async () => {
                 <p class="error-msg" v-else-if="errors.invalidGameId">L'identifiant entré est incorrect...</p>
                 <div class="btns">
                     <button class="join-game" @click="$event => getGame()">GO !</button>
-                    <button class="login-or-register" onclick="alert('hello')">login/sign up</button>
+                    <button class="login-or-register" @click="router.push('/login')">login/sign up</button>
                 </div>
                 <div class="create-game" v-if="!currentUser">
                     <p><u>Vous devez avoir un compte afin de créer une partie.</u></p>
+                </div>
+                <div v-else-if="currentUser.game_id">
+                    <p><i>Partie en cours</i> : <router-link :to="`/game/${currentUser.game_id}`">Rejoindre</router-link></p>
                 </div>
                 <div class="create-game" v-else>
                     <p>...ou créez votre partie publique/privée.</p>

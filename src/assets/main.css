@@ -14,15 +14,22 @@
 }
 
 #app > main {
-    padding: 2rem;
+    padding: 2rem 2rem 2rem 120px;
     flex: 1;
+}
+
+@media screen and (max-width: 900px) {
+    #app > main {
+        padding-left: 2rem;
+    }
 }
 
 .__blank {
     flex: 1;
 }
 
-h2, p {
+h2, p,
+.tippy-content {
     font-family: 'Share Tech Mono', cursive;
 }
 

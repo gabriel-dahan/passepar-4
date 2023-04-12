@@ -1,8 +1,8 @@
 import _ from 'lodash';
 
-const HOST = '127.0.0.1' //'51.83.73.242';
-const PORT = 5000 //1102;
-const API_BASE = `http://${HOST}:${PORT}/api`;
+import axios from 'axios';
+
+const API_BASE = `/api`;
 
 const ERR_CODES = {
     // -- See error codes : https://github.com/gabriel-dahan/connect4-game/blob/main/api/README.md --
@@ -49,24 +49,32 @@ const __formatData = (payload: any) => {
 }
 
 const __get = (endpoint: string) => {
-    return fetch(endpoint, {
-        method: "GET",
+    return axios.get(endpoint, {
         headers: {
             'Content-Type': 'application/json'
         },
     });
 }
 
-const __post = (endpoint: string, payload = {}, method = 'POST') => {
-    return fetch(endpoint, {
-        method: method,
-        body: __formatData(payload)
+const __post = (endpoint: string, payload = {}) => {
+    return axios.post(endpoint, __formatData(payload), {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        } 
     });
 }
 
-const __put = (endpoint: string, payload = {}) => __post(endpoint, payload, 'PUT');
+const __put = (endpoint: string, payload = {}) => {
+    return axios.put(endpoint, __formatData(payload), {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        } 
+    });
+}
 
-const __delete = (endpoint:string, payload = {}) => __post(endpoint, payload, 'DELETE');
+const __delete = (endpoint:string) => { 
+    return axios.delete(endpoint);
+}
 
 class Users {
     endpoint: string;
@@ -80,46 +88,51 @@ class Users {
             name: name_,
             email: email,
             password: password
-        }).then(res => res.json());
+        }, ).then(res => res.data);
     }
 
     async login(email: string, password: string) {
         return __post(`${this.endpoint}/login`, {
             email: email,
             password: password
-        }).then(res => res.json());
+        }).then(res => res.data);
     }
 
     async search(name_ = '', email = '', limit = 10) {
         let params = `?name=${name_}&email=${email}&limit=${limit}`;
         return __get(`${this.endpoint}/search${params}`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
     async get(id: string) {
         return __get(`${this.endpoint}/${id}`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
     async from_session(token: string) {
         return __get(`${this.endpoint}/token/${token}`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
     async delete_session(token: string) {
         return __delete(`${this.endpoint}/token/${token}/delete`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
-    async update(id: string, name_ = null, email = null, password = null, score = null) {
+    async update(id: string, name_: string | null = null, email: string | null = null, password: string | null = null, score: number | null = null) {
         return __put(`${this.endpoint}/${id}/update`, { 
             name: name_,
             email: email,
             password: password,
             score: score
-        }).then(res => res.json());
+        }).then(res => res.data);
     }
 
+    async add_score(id: string, score: number) {
+        return __put(`${this.endpoint}/${id}/addscore`, {
+            score: score
+        }).then(res => res.data);
+    }
 }
 
 class Games {
@@ -133,18 +146,18 @@ class Games {
         return __post(`${this.endpoint}/new`, {
             public: public_,
             owner_id: ownerId
-        }).then(res => res.json());
+        }).then(res => res.data);
     }
 
     async list(onlyIds = false, onlyPublic = false) {
         let onlyIdsStr = onlyIds ? 'true' : 'false';
         return __get(`${this.endpoint}/list?only_ids=${onlyIdsStr}&only_public=${onlyPublic}`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
     async get(gameKey: string) {
         return __get(`${this.endpoint}/${gameKey}`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 
     async addplayer(gameKey: string, color: number, userId: string | null = null) {
@@ -152,18 +165,18 @@ class Games {
         return __post(`${this.endpoint}/${gameKey}/addplayer`, { 
             user_id: userId,
             color: color
-        }).then(res => res.json());
+        }).then(res => res.data);
     }
 
     async play(gameKey: string, column: string) {
         return __put(`${this.endpoint}/${gameKey}/play`, { 
             column: column
-        }).then(res => res.json());
+        }).then(res => res.data);
     }
 
     async delete(gameKey: string) {
         return __delete(`${this.endpoint}/${gameKey}/delete`)
-            .then(res => res.json());
+            .then(res => res.data);
     }
 }
 

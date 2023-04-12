@@ -1,10 +1,7 @@
 
 <script setup lang="ts">
-import Header from '@/components/Header.vue';
-import Footer from '@/components/Footer.vue';
-import LoadingPage from './components/LoadingPage.vue';
-import Cursor from './components/Cursor.vue';
-import BackMusic from './components/BackMusic.vue';
+import NavBarDesk from '@/components/NavBarDesk.vue';
+import LoadingPage from '@/components/LoadingPage.vue';
 </script>
 
 <script lang="ts">
@@ -16,9 +13,7 @@ Array.from(inputs).forEach(input => {
 
 <template>
     <LoadingPage></LoadingPage>
-    <BackMusic></BackMusic>
-    <!--<Cursor></Cursor>-->
-    <Header></Header>
+    <NavBarDesk></NavBarDesk>
     <main>
         <router-view />
     </main>

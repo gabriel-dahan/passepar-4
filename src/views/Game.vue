@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref, inject, type Ref } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 import { API, getRawErrs, updateErrs } from '@/assets/ts/api';
-import { matrixAsColumns } from '@/assets/ts/utils';
+import { matrixAsColumns, loadCurrentUser } from '@/assets/ts/utils';
 
 import type { Game, User } from '@/assets/ts/interfaces';
 
@@ -17,19 +17,17 @@ const game = ref({} as Game);
 
 const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
 const currentUser = ref({} as User);
-
-const $socket = io('http://localhost:5000/game', { path: '/websocket' });
+const validOrientation = ref(true);
 
 const errors = ref(getRawErrs());
 /* ------------ */
 
-const loadCurrentUser = async () => {
-    let user = await $promisedUser;
-    if(user !== undefined)
-        currentUser.value = user as User;
-    else
-        console.error('Current user cannot be loaded.')
-};
+let $socket: Socket = io();
+const initializeSocketConn = () => {
+    $socket = io(`http://${location.hostname}:5000/game`, {
+        path: '/websocket'
+    });
+}
 
 const loadGameData = async () => {
     let loadedGame = await API.games.get(id);
@@ -41,17 +39,27 @@ const loadGameData = async () => {
 
 const initializeWSEvents = () => {
     $socket.on('connect', () => {
+        console.log('--- Connected ---')
         $socket.emit('room_join', { room_id: game.value.id });
     });
 
-    $socket.on('redirect', (route) => {
-        router.push(route);
+    $socket.on('redirect', (data) => {
+        router.push(data.route).then(() => {
+            if(data.reload)
+                router.go(0);
+        });
     });
 
     $socket.on('new_data', (new_game) => {
         // Changes the game data's matrix to make it easier to manipulate in game.
         new_game.matrix = matrixAsColumns(new_game.matrix); 
         game.value = new_game;
+    });
+
+    $socket.on('end_game', (winner) => {
+        API.games.delete(game.value.id).then(data => {
+            router.push('/');
+        });
     });
 
     /* Handles connection to the game room : 
@@ -61,10 +69,22 @@ const initializeWSEvents = () => {
     */
 };
 
+const orientationValidator = () => {
+    screen.orientation.onchange = () => {
+        let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let isPortrait = window.screen.orientation.type === 'portrait-primary';
+        if(isMobile && isPortrait) 
+            validOrientation.value = false;
+        validOrientation.value = true;
+    };
+};
+
 onMounted(async () => {
-    await loadCurrentUser();
+    await loadCurrentUser($promisedUser, currentUser);
     await loadGameData();
+    initializeSocketConn();
     initializeWSEvents();
+    orientationValidator();
 });
 
 onBeforeRouteLeave((to, from, next) => {
@@ -85,7 +105,9 @@ const isPlayer = (userId: string) => {
 
 const deleteGame = () => {
     API.games.delete(id).then(data => {
-        $socket.emit('redirect', '/', game.value.id);
+        $socket.emit('redirect', {
+            route: '/', reload: true
+        }, game.value.id);
     });
 }
 
@@ -111,28 +133,45 @@ const launchGame = () => {
 
 /* --- GAME --- */ 
 
+const shakeColumn = (column: number, shakeTime: number = 300) => {
+    const columnElem: HTMLDivElement | null = document.querySelector(`.column-${column}`);
+    if(columnElem) {
+        columnElem.classList.add('shake');
+        setTimeout(() => {
+            columnElem.classList.remove('shake');
+        }, shakeTime);
+    }
+}
+
 const play = (column: number) => {
     if(currentUser.value.id === game.value.players[game.value.turn - 1].user.id) {
         API.games.play(game.value.id, String(column))
             .then(data => {
                 $socket.emit('play', game.value.id);
-                if(data.code && data.code === 'G3') {
-                    alert(`Column ${column + 1} is full.`) // Testing purposes.
-                }
+                if(data.code && data.code === 'G3')
+                    shakeColumn(column)
             })
             .catch(error => console.error(error));
-    }
+    } else 
+        shakeColumn(column)
 };
 
-const showCell = (e: Event, column: number) => {
-    // Doit afficher un faux pion a moitié transparent pour que l'utilisateur sache ou placer son prochain pion
+const leaveGame = () => {
+    API.games.delete(id).then(game => {
+        API.users.add_score(currentUser.value.id, -20).then(user => {
+            $socket.emit('redirect', {
+                route: '/', 
+                reload: true
+            }, game.id);
+        })
+    });
 }
 
 /* ------------ */ 
 </script>
 
 <template>
-    <div class="game-room">
+    <div class="game-room" v-if="game.id">
         <p class="privacy public" v-if="game.public">Partie publique</p>
         <p class="privacy private" v-else>Partie privée</p>
         
@@ -166,14 +205,14 @@ const showCell = (e: Event, column: number) => {
                 </div>
                 <div class="game-join" v-else-if="game.players.length === 1 && !isPlayer(currentUser?.id)">
                     <p>Il ne manque que vous !</p>
-                    <button class="start-game" @click="joinGame((game.players[0].color + 1) % 2)">Cliquez ici pour rejoindre la partie</button>
+                    <button class="join-btn" @click="joinGame((game.players[0].color + 1) % 2)">Cliquez ici pour rejoindre la partie</button>
                     <p>Attention, c'est un point de non retour...</p>
                 </div>
                 <div class="game-join" v-else-if="game.players.length === 1">
                     <p>Attendez qu'un autre joueur rejoigne la partie...</p>
                 </div>
                 <div class="wait-room" v-else-if="game.players.length === 2 && game.status === 0 && game.owner.id === currentUser.id">
-                    <button @click="launchGame">Lancer la partie ?</button>
+                    <button class="launch-game" @click="launchGame">Lancer la partie ?</button>
                 </div>
                 <div v-else-if="game.players.length === 2 && game.status === 0 && isPlayer(currentUser.id)">
                     <p>Attendez que l'hôte lance la partie...</p>
@@ -184,9 +223,9 @@ const showCell = (e: Event, column: number) => {
         <!-- STARTED GAME -->
         <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1">
             <p>Tour : {{ game.players[game.turn - 1].user.name }}</p>
-            <div id="grid">
+            <div id="grid" v-if="validOrientation">
                 <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
-                <div :class="'column-' + (index - 1)" @click="play(index - 1)" @mouseover="showCell($event, index - 1)" v-for="index in game.matrix.length">
+                <div :class="'column-' + (index - 1)" @click="play(index - 1)" v-for="index in game.matrix.length">
                     <div class="cells" @mouseover.capture>
                         <div class="cell" v-for="cell in game.matrix[index - 1]">
                             <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
@@ -198,7 +237,17 @@ const showCell = (e: Event, column: number) => {
                     <span class="col-num">{{ index }}</span>
                 </div>
             </div>
+            <div v-else>
+                <p>Mettez vous en mode paysage pour voir la partie.</p>
+            </div>
             <p>Partie #{{ game.id }}</p>
+            <tippy placement="right" trigger="click" interactive>
+                <button class="leave-game">Quitter la partie</button>
+                <template #content>
+                    <p class="error-msg">/!\ Quitter une partie en cours entraine une pénalité de points. <button @click="leaveGame">Confirmer</button></p>
+                    
+                </template>
+            </tippy>
         </div>
         <p class="connected-as" v-if="!currentUser">
             Vous jouez en tant qu'invité.
@@ -207,10 +256,15 @@ const showCell = (e: Event, column: number) => {
             Vous jouez en tant que <span class="username">{{ currentUser.name }}</span>
         </p>
     </div>
+    <div v-else>
+        <p>Cette partie est finie ou n'exite pas...</p>
+    </div>
 </template>
 
 <style scoped>
 .game-room {
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -238,7 +292,7 @@ const showCell = (e: Event, column: number) => {
 }
 
 .privacy.private {
-    border: 1px solid #EE2E31;
+    border: 1px solid #f15f5f;
 }
 
 .pre-game > .delete-game {
@@ -277,18 +331,34 @@ const showCell = (e: Event, column: number) => {
     flex-direction: column;
 }
 
-.pre-game > .main-content > .game-join > .start-game {
+.pre-game > .main-content > .game-join > .join-btn {
     background-color: transparent;
     font-family: 'Share Tech Mono', cursive;
-    color: #EE2E31;
+    color: #f15f5f;
     font-size: 16px;
     border: none;
     transition: 0.3s;
     cursor: pointer;
 }
 
-.pre-game > .main-content > .game-join > .start-game:hover {
+.pre-game > .main-content > .game-join > .join-btn:hover {
     transform: scale(1.1);
+}
+
+.pre-game > .main-content > .wait-room > .launch-game {
+    margin-top: 15px;
+    padding: 3px 5px;
+    border: 2px solid var(--matrix-text);
+    border-radius: 5px;
+    font-family: 'Share Tech Mono', cursive;
+    color: var(--matrix-text);
+    background-color: #297373;
+}
+
+.pre-game > .main-content > .wait-room > .launch-game:hover {
+    border-color: #297373;
+    color: #297373;
+    background-color: var(--matrix-text);
 }
 
 .pre-game > .main-content > .pill-choice > .pills {
@@ -325,6 +395,7 @@ const showCell = (e: Event, column: number) => {
     justify-content: center;
     align-items: center;
     display: flex;
+    gap: 5px;
 }
 
 .game > #grid > [class^='column-'] {
@@ -333,6 +404,11 @@ const showCell = (e: Event, column: number) => {
     justify-content: center;
     align-items: center;
     gap: 5px;
+}
+
+.game > #grid > [class^='column-'].shake:hover > .cells {
+    border: 2px #f15f5f solid;
+    animation: shake 0.3s;
 }
 
 .game > #grid > [class^='column-'] > .col-num {
@@ -345,10 +421,11 @@ const showCell = (e: Event, column: number) => {
     flex-direction: column;
     border: 2px transparent solid;
     border-radius: 5px;
+    transition: 0.4s;
 }
 
 .game > #grid > [class^='column-']:hover > .cells {
-    border: 2px var(--color-text) /*rgb(50, 238, 91) rgb(113, 113, 219) */ solid;
+    border: 2px var(--color-text) solid;
 }
 
 .game > #grid > [class^='column-'] > .cells > .cell {
@@ -362,5 +439,24 @@ const showCell = (e: Event, column: number) => {
     width: 50px;
     height: auto;
     rotate: -30deg;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0) }
+    25% { transform: translateX(5px) }
+    50% { transform: translateX(-5px) }
+    75% { transform: translateX(5px) }
+    100% { transform: translateX(0) }
+}
+
+@media screen and (max-width: 1000px) {
+    .game > #grid {
+        transform: scale(0.8);
+    }
+}
+@media screen and (max-width: 550px) {
+    .pre-game > .main-content > .pill-choice > .pills {
+        gap: 60px;
+    }
 }
 </style>

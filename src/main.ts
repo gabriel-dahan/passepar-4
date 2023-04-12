@@ -1,9 +1,10 @@
-import { createApp } from 'vue'
+import { createApp } from 'vue';
 import VueTippy from 'vue-tippy';
 import 'tippy.js/dist/tippy.css'
+import 'tippy.js/themes/light.css';
 
-import App from './App.vue'
-import './assets/main.css'
+import App from './App.vue';
+import './assets/main.css';
 import { API } from './assets/ts/api';
 import type { User } from './assets/ts/interfaces';
 
@@ -13,22 +14,23 @@ const app = createApp(App);
 app.use(router);
 app.use(VueTippy, {
     defaultProps: { 
-        touch: 'hold' 
+        touch: 'hold'
     },
 });
-app.mount('#app');
 
 /* Get current logged user (using session token). */
 let $promisedUser: Promise<User | null> = Promise.resolve(null);
 const sessionToken = localStorage.getItem('auth_token'); // Get auth_token locally stored.
 if(sessionToken)
-    $promisedUser = API.users.from_session(sessionToken).then(data => { return data?.id ? data : null; });
+$promisedUser = API.users.from_session(sessionToken).then(data => { return data?.id ? data : null; });
 
 app.provide('promisedUser', $promisedUser) // Provide global Vue variable to get current user in other vues.
 
+app.mount('#app');
+
 $promisedUser.then(user => {
     router.beforeEach((to, from) => {
-        if (to.meta.redirectProfile && user) {
+        if(to.meta.redirectProfile && user) {
             router.push(`/p/${user.id}`)
         }
     });

@@ -33,14 +33,6 @@ const playAudio = () => {
 </template>
 
 <style scoped>
-
-.playBtn {
-    z-index: 1;
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-}
-
 button {
     outline: none;
     border: 2px transparent solid;
