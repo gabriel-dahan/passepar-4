@@ -42,6 +42,28 @@ class UserUpdate(Resource):
             'message': f'user \'{user.id}\' was successfuly updated.',
             'user': user.json_repr()
         })
+    
+class UserAddScore(Resource):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('score', type = int, required = True, location = 'form')
+
+    def put(self, userid: str) -> Response:
+        user: User = User.query.filter_by(id = userid).first()
+        if not user:
+            return jsonify({
+                'code': 'U2',
+                'message': f'User with id \'{userid}\' doesn\'t exist.'
+            })
+        args = self.parser.parse_args()
+        user.score += args.get('score')
+        db.session.commit()
+        return jsonify({
+            'message': f'User \'{user.id}\' score was successfuly updated.',
+            'user': user.json_repr()
+        })
 
 class SearchUser(Resource):
 
@@ -192,6 +214,7 @@ class DeleteUserSession(Resource):
 # -- RESOURCES -- #
 root = f'{API_ROOT}/user'
 api.add_resource(UserUpdate, f'{root}/<string:userid>/update')
+api.add_resource(UserAddScore, f'{root}/<string:userid>/addscore')
 api.add_resource(UserInfo, f'{root}/<string:userid>')
 api.add_resource(LoginUser, f'{root}/login')
 api.add_resource(RegisterUser, f'{root}/register')

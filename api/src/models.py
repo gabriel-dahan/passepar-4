@@ -84,6 +84,11 @@ class User(db.Model):
     owner_of: Game = db.relationship('Game', backref = 'owner', lazy = True, uselist = False) # One-to-One
 
     def json_repr(self) -> dict:
+        game_id = None
+        if player := Player.query.filter_by(user_id = self.id).first():
+            game_id = player.game.id
+        elif game := Game.query.filter_by(created_by = self.id).first():
+            game_id = game.id
         return {
             'id': self.id,
             'name': self.name,
@@ -92,5 +97,6 @@ class User(db.Model):
             'email': self.email,
             'anonymized_email': anonymize_email(self.email),
             'score': self.score,
-            'auth_tokens': [auth_token.json_repr() for auth_token in self.auth_tokens]
+            'auth_tokens': [auth_token.json_repr() for auth_token in self.auth_tokens],
+            'game_id': game_id
         }

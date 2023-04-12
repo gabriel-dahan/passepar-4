@@ -19,7 +19,7 @@ cors = CORS(app, resources = {r'/api/*': {'origins': '*'}})
 socket = SocketIO(
     app, 
     path = '/websocket',
-    cors_allowed_origins = ['http://127.0.0.1:5173']
+    cors_allowed_origins = '*'
 )
 
 app.url_map.strict_slashes = False

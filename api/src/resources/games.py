@@ -149,12 +149,12 @@ class NewGame(Resource):
     def __init__(self) -> None:
         super().__init__()
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument('public', type = bool, default = False, location = 'form')
+        self.parser.add_argument('public', type = str, default = False, location = 'form')
         self.parser.add_argument('owner_id', type = str, required = True, location = 'form')
 
     def post(self):
         args = self.parser.parse_args()
-        public = args.get('public')
+        public = args.get('public') == 'true'
         owner_id = args.get('owner_id')
         if not User.query.filter_by(id = owner_id).first():
             return jsonify({
@@ -195,9 +195,9 @@ class GameWS(Namespace):
 
     # Joins the room but not the game itself
     def on_room_join(self, data):
-        room = data['room_id']
-        join_room(room)
-        emit('room_join', room, to = room)
+        if room := data.get('room_id'):
+            join_room(room)
+            emit('room_join', room, to = room)
 
     # Joins the game and becomes a player
     def on_game_join(self, room_id: str):
@@ -212,9 +212,17 @@ class GameWS(Namespace):
 
     def on_play(self, room_id: str):
         room: Game = Game.query.filter_by(id = room_id).first()
-        emit('new_data', room.json_repr(), to = room_id, broadcast = True)
+        room_repr = room.json_repr()
+        gamecore = GameCore(room_repr['matrix'])
+        winner = gamecore.check_end()
+        if winner != 0:
+            room.players[winner - 1].user.score += 25 # Add 25 score to the user corresponding to the player's id of the winner (0 or 1).
+            room.players[winner % 2].user.score -= 15 # Removes 15 score to the looser (0 if the winner is 1; 1 if the winner is 0).
+            db.session.commit()
+            emit('end_game', winner, to = room_id, broadcast = True)
+        emit('new_data', room_repr, to = room_id, broadcast = True)
     
-    def on_redirect(self, route: str, room: str):
-        emit('redirect', route, to = room, broadcast = True)
+    def on_redirect(self, data, room: str):
+        emit('redirect', data, to = room, broadcast = True)
 
 socket.on_namespace(GameWS('/game'))

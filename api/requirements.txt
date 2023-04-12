@@ -10,6 +10,7 @@ Flask-RESTful==0.3.9
 Flask-SocketIO==5.3.3
 Flask-SQLAlchemy==3.0.3
 greenlet==2.0.2
+h11==0.14.0
 idna==3.4
 importlib-metadata==6.0.0
 itsdangerous==2.1.2
@@ -20,8 +21,10 @@ python-dotenv==0.21.1
 python-engineio==4.4.0
 python-socketio==5.8.0
 pytz==2022.7.1
+simple-websocket==0.10.0
 six==1.16.0
 SQLAlchemy==2.0.2
 typing-extensions==4.4.0
 Werkzeug==2.2.2
+wsproto==1.2.0
 zipp==3.12.1
