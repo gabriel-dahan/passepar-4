@@ -38,7 +38,6 @@ const loadGameData = async () => {
 
 const initializeWSEvents = () => {
     $socket.on('connect', () => {
-        console.log('--- Connected ---')
         $socket.emit('room_join', { room_id: game.value.id });
     });
 
@@ -56,9 +55,10 @@ const initializeWSEvents = () => {
     });
 
     $socket.on('end_game', (winner) => {
-        
         API.games.delete(game.value.id).then(data => {
-            router.push('/');
+            const endGameElem = document.getElementById('end-game');
+            endGameElem?.classList.add('active');
+            // router.push('/');
         });
     });
 };
@@ -158,12 +158,16 @@ const leaveGame = () => {
 </script>
 
 <template>
-    <div class="game-room" v-if="game.id">
+    <div class="game-room" v-if="game?.id">
+        <div id="end-game">
+            <img src="@/assets/passepartout.jpeg" alt="passepartout" class="passepartout">
+            <h1>GAME OVER</h1>
+        </div>
         <div class="change-privacy" v-if="game.public">
             <p class="privacy public" >Partie publique</p>
             <button 
                 @click="changeGamePrivacy"
-                v-if="game.status === 0 && game.owner.id === currentUser.id"
+                v-if="game.status === 0 && game.owner.id === currentUser?.id"
             >
                 Changer ?
             </button>
@@ -226,14 +230,21 @@ const leaveGame = () => {
 
         <!-- STARTED GAME -->
         <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1 && isPlayer(currentUser.id)">
-            <p>Tour : <span style="color: #fff;">{{ game.players[game.turn - 1].user.name }}</span></p>
+            <p>Tour : <span :style="`color: ${game.turn === 1 + game.players[0].color ? 'var(--vt-c-soft-red)' : 'var(--vt-c-soft-blue-1)'};`">{{ game.players[game.turn - 1].user.name }}</span></p>
             <div id="grid" >
                 <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
                 <div :class="'column-' + (index - 1)" @click="play(index - 1)" v-for="index in game.matrix.length">
                     <div class="cells" @mouseover.capture>
-                        <div class="cell" v-for="cell in game.matrix[index - 1]">
+                        <!-- If the color of the game owner is red -->
+                        <div class="cell" v-for="cell in game.matrix[index - 1]" v-if="game.players[0].color === 0"> 
                             <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 1">
                             <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 2">
+                            <img src="@/assets/void.svg" alt="NP" v-else>
+                        </div>
+                        <!-- Else -->
+                        <div class="cell" v-for="cell in game.matrix[index - 1]" v-else> 
+                            <img src="@/assets/pawn1.svg" alt="P1" v-if="cell == 2">
+                            <img src="@/assets/pawn2.svg" alt="P2" v-else-if="cell == 1">
                             <img src="@/assets/void.svg" alt="NP" v-else>
                         </div>
                     </div>
@@ -265,6 +276,57 @@ const leaveGame = () => {
 </template>
 
 <style scoped>
+
+#end-game {
+    background-color: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    position: absolute;
+    display: none;
+    transition: 0.5s;
+}
+
+#end-game.active {
+    display: flex;
+    flex-direction: column;
+    gap: 200px;
+    align-items: center;
+    justify-content: center;
+}
+
+#end-game > .passepartout {
+    width: 20px;
+    animation: rotation 3s, disappear 4s 1s;
+}
+
+#end-game > h1 {
+    color: var(--matrix-text);
+}
+
+.game-room > #end-game.active {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+@keyframes rotation {
+    0% {
+        transform : rotate(1deg) scale(1);
+    }
+    100% {
+        transform: rotate(1080deg) scale(20);
+    }
+}
+
+@keyframes disappear {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
 .game-room {
     width: 100%;
     height: 100%;

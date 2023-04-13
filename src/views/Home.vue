@@ -61,7 +61,7 @@ const createGame = () => {
 onMounted(async () => {
     const pbGames = (await API.games.list(false, true)).games;
     publicGames.value = (<Game[]>pbGames).filter(g => { 
-        return g.players.length >= 0 /* CHANGE HERE TO SHOW ONLY INTITIALIZATED GAMES (length = 1 instead of >= 0) */
+        return g.players.length = 1;
     });
     await loadCurrentUser($promisedUser, currentUser);
 })
