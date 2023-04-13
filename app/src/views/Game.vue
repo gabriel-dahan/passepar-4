@@ -271,7 +271,7 @@ const leaveGame = () => {
         </p>
     </div>
     <div v-else>
-        <p>Cette partie est finie ou n'exite pas...</p>
+        <p>Cette partie est finie ou n'existe pas...</p>
     </div>
 </template>
 
