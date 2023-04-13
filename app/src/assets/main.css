@@ -1,0 +1,47 @@
+@import './base.css';
+
+/* FONTS */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    font-weight: normal;
+}
+
+#app > main {
+    padding: 2rem 2rem 2rem 120px;
+    flex: 1;
+}
+
+@media screen and (max-width: 900px) {
+    #app > main {
+        padding-left: 2rem;
+    }
+}
+
+.__blank {
+    flex: 1;
+}
+
+h2, p,
+.tippy-content {
+    font-family: 'Share Tech Mono', cursive;
+}
+
+a {
+    color: var(--link-blue);
+    transition: 0.3s;
+}
+
+a:hover {
+    color: var(--link-blue-hover)
+}
+
+.error-msg {
+    color: var(--error-text);
+}

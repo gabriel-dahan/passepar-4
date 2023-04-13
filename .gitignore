@@ -2,5 +2,3 @@
 .env
 instance/
 __pycache__/
-
-.design/
