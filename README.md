@@ -33,7 +33,7 @@ $ pip install -r requirements.txt
 
 <hr/>
 
-Il vous faut ensuite créer un fichier `.env` à la racine de la partie `./api` avec les données suivantes :
+Il vous faut ensuite créer un fichier `.env` à la racine du dossier `./api` avec les données suivantes :
 
 ```bash
 DB_URI=sqlite:///site.db 
@@ -80,7 +80,7 @@ Pour installer l'application dans son ensemble (hors-API), il suffit d'éxecuter
 ```bash
 $ npm install 
 ```
-Cette commande va installer toutes les dépendances du projet dans les bonnes versions, il est alors possible de lancer l'application (en développement) avec la commande suivant :
+Cette commande va installer toutes les dépendances du projet dans les bonnes versions, il est alors possible de lancer l'application (en développement) avec la commande suivante :
 ```bash
 $ npm run dev
 ```
