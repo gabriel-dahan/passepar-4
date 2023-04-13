@@ -16,7 +16,7 @@ const currentUser = ref({} as User | null);
 
 const loadRequestedUser = async () => {
     let u: User = await API.users.get(id);
-    if(!u.id)
+    if (!u.id)
         alert('Requested user does not exist.');
     else
         user.value = u;
@@ -36,13 +36,63 @@ onMounted(async () => {
 </script>
 
 <template>
-    <p>Utilisateur <span class="username">{{ user.name }}</span> <small>(#{{ user.id }})</small></p>
-    <p>Score : <span class="score">{{ user.score }}</span></p>
-    <button @click="disconnectUser" v-if="currentUser && currentUser.id === user.id">Se déconnecter</button>
+    <div class="flex-container">
+        <div class="center">
+            <img class="rounded-card" :src="currentUser.avatar_url" alt="User">
+
+            <p>Utilisateur <span class="username">{{ user.name }}</span> <small>(#{{ user.id }})</small></p>
+            <p>Score : <span class="score">{{ user.score }}</span></p>
+            <div class="btns">
+                <button @click="disconnectUser" v-if="currentUser && currentUser.id === user.id">Se déconnecter</button>
+            </div>
+
+
+        </div>
+    </div>
 </template>
 
 <style scoped>
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.rounded-card {
+    border-radius: 50%;
+
+}
+
+
+
 .username {
+    color: var(--matrix-text);
+}
+
+
+.btns>button {
+    margin-top: 5px;
+    display: flex;
+    gap: 5px;
+    font-family: 'Share Tech Mono', cursive;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border-style: solid;
+    animation-duration: 4.1s;
+    transition-duration: 0.4s;
+}
+
+.btns>button {
+    border-color: var(--matrix-text);
+    background-color: var(--matrix-text);
+    gap: 10px;
+}
+
+.btns>button:hover {
+    background-color: var(--color-background);
+    border-color: var(--matrix-text);
     color: var(--matrix-text);
 }
 
