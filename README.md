@@ -20,7 +20,7 @@ Suivez ces étapes pas à pas pour installer l'API.
 **Windows** :
 ```bash
 $ python -m venv .venv
-$ . .venv/Scripts/activate
+$ .venv\Scripts\activate
 $ pip install -r requirements.txt
 ```
 
