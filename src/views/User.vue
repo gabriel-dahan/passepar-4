@@ -38,7 +38,7 @@ onMounted(async () => {
 <template>
     <div class="flex-container">
         <div class="center">
-            <img class="rounded-card" :src="currentUser.avatar_url" alt="User">
+            <img class="rounded-card" :src="user.avatar_url" alt="Avatar">
 
             <p>Utilisateur <span class="username">{{ user.name }}</span> <small>(#{{ user.id }})</small></p>
             <p>Score : <span class="score">{{ user.score }}</span></p>
@@ -65,12 +65,9 @@ onMounted(async () => {
 
 }
 
-
-
 .username {
     color: var(--matrix-text);
 }
-
 
 .btns>button {
     margin-top: 5px;
