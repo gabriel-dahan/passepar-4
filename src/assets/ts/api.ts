@@ -83,6 +83,10 @@ class Users {
         this.endpoint = API_BASE + '/user';
     }
 
+    async all() {
+        return __get(`${this.endpoint}/all`).then(res => res.data);
+    }
+
     async register(name_: string, email: string, password: string) {
         return __post(`${this.endpoint}/register`, {
             name: name_,

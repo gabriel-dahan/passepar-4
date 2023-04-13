@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const playAudio = () => {
     const audioElem = <HTMLAudioElement>document.getElementById('backsong');
-    const btn = <HTMLButtonElement>document.getElementById('songBtn');
+    const btn = <HTMLButtonElement>document.getElementById('song-btn');
     if(!audioElem.paused) {
         audioElem.pause();
         btn.classList.remove('playing');
@@ -14,9 +14,11 @@ const playAudio = () => {
 </script>
 
 <template>
-    <div class="playBtn">
-        <tippy placement="right" interactive>
-            <button id="songBtn" @click="playAudio">♪</button>
+    <div class="play-btn">
+        <tippy placement="bottom" interactive>
+            <button id="song-btn" @click="playAudio">
+                <img src="@/assets/icons/sound.svg" alt="Sound">
+            </button>
             <template #content>
                 <p style="width: max-content;">
                     Crédits : 
@@ -34,11 +36,13 @@ const playAudio = () => {
 
 <style scoped>
 button {
+    width: 30px;
+    height: 30px;
     outline: none;
     border: 2px transparent solid;
     border-radius: 5px;
     transition: 0.3s;
-    background-color: gray;
+    background-color: var(--color-background);
     font-size: 16px;
 }
 
@@ -48,5 +52,10 @@ button:hover {
 
 button.playing:not(:hover) {
     background: var(--matrix-text);
+}
+
+button > img {
+    width: 12px;
+    height: auto;
 }
 </style>

@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import NavBarDesk from '@/components/NavBarDesk.vue';
+import NavBar from '@/components/NavBar.vue';
 import LoadingPage from '@/components/LoadingPage.vue';
 </script>
 
@@ -13,7 +13,7 @@ Array.from(inputs).forEach(input => {
 
 <template>
     <LoadingPage></LoadingPage>
-    <NavBarDesk></NavBarDesk>
+    <NavBar></NavBar>
     <main>
         <router-view />
     </main>

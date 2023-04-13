@@ -17,7 +17,6 @@ const game = ref({} as Game);
 
 const $promisedUser: Promise<User> | Promise<null> | undefined = inject('promisedUser');
 const currentUser = ref({} as User);
-const validOrientation = ref(true);
 
 const errors = ref(getRawErrs());
 /* ------------ */
@@ -57,26 +56,11 @@ const initializeWSEvents = () => {
     });
 
     $socket.on('end_game', (winner) => {
+        
         API.games.delete(game.value.id).then(data => {
             router.push('/');
         });
     });
-
-    /* Handles connection to the game room : 
-    $socket.on('room_join', (room) => {
-        
-    });
-    */
-};
-
-const orientationValidator = () => {
-    screen.orientation.onchange = () => {
-        let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        let isPortrait = window.screen.orientation.type === 'portrait-primary';
-        if(isMobile && isPortrait) 
-            validOrientation.value = false;
-        validOrientation.value = true;
-    };
 };
 
 onMounted(async () => {
@@ -84,7 +68,6 @@ onMounted(async () => {
     await loadGameData();
     initializeSocketConn();
     initializeWSEvents();
-    orientationValidator();
 });
 
 onBeforeRouteLeave((to, from, next) => {
@@ -102,6 +85,10 @@ const isPlayer = (userId: string) => {
 };
 
 /* --- PRE-GAME --- */ 
+
+const changeGamePrivacy = () => {
+    $socket.emit('change_privacy', game.value.id);
+} 
 
 const deleteGame = () => {
     API.games.delete(id).then(data => {
@@ -172,12 +159,29 @@ const leaveGame = () => {
 
 <template>
     <div class="game-room" v-if="game.id">
-        <p class="privacy public" v-if="game.public">Partie publique</p>
-        <p class="privacy private" v-else>Partie privée</p>
+        <div class="change-privacy" v-if="game.public">
+            <p class="privacy public" >Partie publique</p>
+            <button 
+                @click="changeGamePrivacy"
+                v-if="game.status === 0 && game.owner.id === currentUser.id"
+            >
+                Changer ?
+            </button>
+        </div>
+        <div class="change-privacy" v-else>
+            <p class="privacy private">Partie privée</p>
+            <button 
+                @click="changeGamePrivacy"
+                v-if="game.status === 0 && game.owner.id === currentUser.id"
+            >
+                Changer ?
+            </button>
+        </div>
+        
         
         <p class="guest-not-supported" v-if="!currentUser">Les utilisateurs invités ne sont pas encore supportés.</p>
         <!-- PRE-GAME SCREEN -->
-        <div class="pre-game" v-else-if="game.id && game.status === 0">
+        <div class="pre-game" v-else-if="game.status === 0">
             <button class="delete-game" @click="deleteGame" v-if="currentUser?.id === game.owner.id && game.players.length < 2">Supprimer la partie ?</button>
             <div class="main-content">
                 <h1 class="game-title">Partie #{{ game.id }}</h1>
@@ -221,9 +225,9 @@ const leaveGame = () => {
         </div>
 
         <!-- STARTED GAME -->
-        <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1">
-            <p>Tour : {{ game.players[game.turn - 1].user.name }}</p>
-            <div id="grid" v-if="validOrientation">
+        <div class="game" v-else-if="game.id && game.players.length === 2 && game.status === 1 && isPlayer(currentUser.id)">
+            <p>Tour : <span style="color: #fff;">{{ game.players[game.turn - 1].user.name }}</span></p>
+            <div id="grid" >
                 <!-- Loop goes from 1 to n (not 0 to n-1 in VueJS !), so we have to substract 1 to the index... -->
                 <div :class="'column-' + (index - 1)" @click="play(index - 1)" v-for="index in game.matrix.length">
                     <div class="cells" @mouseover.capture>
@@ -237,17 +241,16 @@ const leaveGame = () => {
                     <span class="col-num">{{ index }}</span>
                 </div>
             </div>
-            <div v-else>
-                <p>Mettez vous en mode paysage pour voir la partie.</p>
-            </div>
             <p>Partie #{{ game.id }}</p>
-            <tippy placement="right" trigger="click" interactive>
+            <tippy placement="bottom" trigger="click" interactive>
                 <button class="leave-game">Quitter la partie</button>
                 <template #content>
-                    <p class="error-msg">/!\ Quitter une partie en cours entraine une pénalité de points. <button @click="leaveGame">Confirmer</button></p>
-                    
+                    <p class="error-msg">/!\ Quitter une partie en cours entraine une pénalité de points. <button class="confirm-leave" @click="leaveGame">Confirmer</button></p>
                 </template>
             </tippy>
+        </div>
+        <div v-else>
+            <p>Cette partie est en cours...</p>
         </div>
         <p class="connected-as" v-if="!currentUser">
             Vous jouez en tant qu'invité.
@@ -282,11 +285,32 @@ const leaveGame = () => {
     justify-content: center;
 }
 
+.change-privacy {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.change-privacy > button {
+    background-color: transparent;
+    border: none;
+    color: var(--color-small-text);
+    font-family: 'Share Tech Mono', cursive;
+    transition: 0.3s;
+}
+
+.change-privacy > button:hover {
+    color: var(--color-text);
+    animation: shake 0.3s;
+}
+
 .privacy {
     color: var(--color-text);
     padding: 0 7px;
     border-radius: 10px;
 }
+
 .privacy.public {
     border: 1px solid #297373;
 }
@@ -391,6 +415,31 @@ const leaveGame = () => {
     gap: 30px;
 }
 
+.game .leave-game {
+    font-family: 'Share Tech Mono', cursive;
+    color: var(--error-text);
+    border-radius: 5px;
+    border: 2px dashed var(--error-text);
+    background-color: transparent;
+    padding: 3px 5px;
+}
+
+.game .leave-game:hover {
+    animation: shake 0.2s;
+}
+
+.game .confirm-leave {
+    font-family: 'Share Tech Mono', cursive;
+    background-color: transparent;
+    color: var(--link-blue);
+    border: none;
+    text-decoration: underline;
+}
+
+.game .confirm-leave:hover {
+    font-style: italic;
+}
+
 .game > #grid {
     justify-content: center;
     align-items: center;
@@ -454,6 +503,32 @@ const leaveGame = () => {
         transform: scale(0.8);
     }
 }
+
+@media screen and (max-width: 740px) {
+    .game > #grid {
+        transform: scale(0.7);
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .game > #grid {
+        transform: scale(0.6);
+    }
+}
+
+
+@media screen and (max-width: 560px) {
+    .game > #grid {
+        transform: scale(0.5);
+    }
+}
+
+@media screen and (max-width: 440px) {
+    .game > #grid {
+        transform: scale(0.4);
+    }
+}
+
 @media screen and (max-width: 550px) {
     .pre-game > .main-content > .pill-choice > .pills {
         gap: 60px;

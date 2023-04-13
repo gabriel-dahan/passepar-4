@@ -31,19 +31,14 @@ onMounted(async () => {
                     <img src="@/assets/icons/search.svg" alt="Search">
                 </router-link>
             </li>
+            <li class="__blank"></li>
             <li v-if="!currentUser">
                 <router-link to="/login" v-tippy="{ content: 'Se connecter', placement: 'right', theme: 'light' }">
                     <img src="@/assets/icons/login.svg" alt="Login">
                 </router-link>
             </li>
-            <li v-if="!currentUser">
-                <router-link to="/register" v-tippy="{ content: 'S\'enregister', placement: 'right', theme: 'light' }">
-                    <img src="@/assets/icons/register.svg" alt="Register">
-                </router-link>
-            </li>
-            <li class="__blank"></li>
             <li v-if="currentUser">
-                <router-link :to="`/p/${currentUser.id}`">
+                <router-link :to="`/p/${currentUser.id}`" v-tippy="{ content: `Profil - ${currentUser.name}`, placement: 'right', theme: 'light' }">
                     <img class="profile" :src="currentUser.avatar_url" alt="User">
                 </router-link>
             </li>
@@ -93,7 +88,7 @@ nav > ul > li .profile {
     nav {
         position: relative;
         width: 100vw;
-        height: 75px;
+        height: 60px;
         flex-shrink: 0;
         border-right: none;
         border-bottom: 2px solid var(--matrix-text);
