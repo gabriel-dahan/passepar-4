@@ -97,6 +97,12 @@ class UserInfo(Resource):
             })
         return jsonify(u.json_repr())
 
+class AllPlayers(Resource):
+
+    def get(self) -> Response:
+        users: List[User] = User.query.order_by(User.score.desc()).all()
+        return jsonify([u.json_repr() for u in users])
+
 class LoginUser(Resource):
 
     def __init__(self) -> None:
@@ -216,6 +222,7 @@ root = f'{API_ROOT}/user'
 api.add_resource(UserUpdate, f'{root}/<string:userid>/update')
 api.add_resource(UserAddScore, f'{root}/<string:userid>/addscore')
 api.add_resource(UserInfo, f'{root}/<string:userid>')
+api.add_resource(AllPlayers, f'{root}/all')
 api.add_resource(LoginUser, f'{root}/login')
 api.add_resource(RegisterUser, f'{root}/register')
 api.add_resource(SearchUser, f'{root}/search')

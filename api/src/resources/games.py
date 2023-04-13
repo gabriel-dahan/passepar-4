@@ -210,6 +210,12 @@ class GameWS(Namespace):
         db.session.commit()
         emit('new_data', room.json_repr(), to = room_id, broadcast = True)
 
+    def on_change_privacy(self, room_id: str):
+        room: Game = Game.query.filter_by(id = room_id).first()
+        room.public = not room.public
+        db.session.commit()
+        emit('new_data', room.json_repr(), to = room_id, broadcast = True)
+
     def on_play(self, room_id: str):
         room: Game = Game.query.filter_by(id = room_id).first()
         room_repr = room.json_repr()
