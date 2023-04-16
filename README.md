@@ -8,6 +8,8 @@ Voici une version hébergée du projet : http://51.83.73.242:5173/
 
 ## Installation
 
+L'installation du projet se fait donc en deux temps :
+
 ### API
 
 Suivez ces étapes pas à pas pour installer l'API.
@@ -18,6 +20,8 @@ Suivez ces étapes pas à pas pour installer l'API.
 - Être administrateur de son ordinateur (en cas de mise sur le réseau).
 
 <hr/>
+
+Créez un nouvel environnement python à l'aide du module venv (natif) et activez-le, puis installez les dépendances du projet :
 
 **Windows** :
 ```bash
@@ -30,7 +34,7 @@ $ pip install -r requirements.txt
 ```bash
 $ python3 -m venv .venv
 $ . .venv/bin/activate
-$ pip install -r requirements.txt
+(.venv) $ pip install -r requirements.txt
 ```
 
 <hr/>
@@ -45,23 +49,23 @@ SECRET=...
 
 - `DB_URI` : Nous recommandons de prendre l'adresse donnée par défaut : bien qu'une adresse MySQL/PostgreSQL soit également valide et fonctionne sans aucun doute, l'API n'a pas été testée pour.
 
-- `SECRET` : Clé secrète de l'application, elle peut par exemple être générée de la maniètre suivante :
+- `SECRET` : Clé secrète de l'application, elle peut par exemple être générée de la maniètre suivante en Python :
 ```python
 import uuid
 uuid.uuid4().hex  # --> Exemple : '21aad80a741a42d584fc17729a7b2018'
 ```
 
-Il reste une dernière étape avant que tout soit prêt à être lancé : (re)initialiser la base de données, à l'aide de la commande suivante : 
+Il reste une dernière étape avant que l'API soit prête à être lancée : (re)initialiser la base de données, à l'aide de la commande suivante : 
 
 ```bash
-$ python resetdb.py
+(.venv) $ python resetdb.py
 ```
 
 > **Note** : Ce fichier à initialement été fait pour réinitialiser la base de données lors de changements durant le développement, mais peut également servir à initialiser la base de données lors du premier lancement du serveur.
 
-Vous pouvez ensuite lancer l'API (en vérifiant bien que vous êtes dans l'environnement virtuel de l'application, raison pour laquelle la ligne suivante ne change pas entre Windows et Linux) : 
+Vous pouvez ensuite lancer l'API : 
 ```bash
-$ python run.py
+(.venv) $ python run.py
 ```
 
 > **Note** : Par défaut, le serveur ne sera accessible qu'en local ! Pour l'ouvrir à votre réseau, il faudra changer le keyword `host` à `0.0.0.0` dans le fichier `run.py` :
