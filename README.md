@@ -27,7 +27,7 @@ Créez un nouvel environnement python à l'aide du module venv (natif) et active
 ```bash
 $ python -m venv .venv
 $ .venv\Scripts\activate
-$ pip install -r requirements.txt
+(.venv) $ pip install -r requirements.txt
 ```
 
 **Linux** : 
