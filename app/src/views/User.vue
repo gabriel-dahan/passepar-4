@@ -37,16 +37,13 @@ onMounted(async () => {
 
 <template>
     <div class="flex-container">
-        <div class="center">
-            <img class="rounded-card" :src="user.avatar_url" alt="Avatar">
-
-            <p>Utilisateur <span class="username">{{ user.name }}</span> <small>(#{{ user.id }})</small></p>
+        <img class="rounded-card" :src="user.avatar_url" alt="Avatar">
+        <div class="infos">
+            <p>Utilisateur <span class="username">{{ user.name }}</span> <span v-if="currentUser?.id === user.id">(vous)</span> <small>(#{{ user.id }})</small></p>
             <p>Score : <span class="score">{{ user.score }}</span></p>
             <div class="btns">
-                <button @click="disconnectUser" v-if="currentUser && currentUser.id === user.id">Se déconnecter</button>
+                <button @click="disconnectUser" v-if="currentUser?.id === user.id">Se déconnecter</button>
             </div>
-
-
         </div>
     </div>
 </template>
@@ -54,7 +51,6 @@ onMounted(async () => {
 <style scoped>
 .flex-container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 30px;
@@ -62,32 +58,31 @@ onMounted(async () => {
 
 .rounded-card {
     border-radius: 50%;
-
+    width: 75px;
+    height: auto;
 }
 
 .username {
     color: var(--matrix-text);
 }
 
-.btns>button {
-    margin-top: 5px;
+.infos {
     display: flex;
+    flex-direction: column;
     gap: 5px;
-    font-family: 'Share Tech Mono', cursive;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border-style: solid;
-    animation-duration: 4.1s;
-    transition-duration: 0.4s;
 }
 
-.btns>button {
+.btns > button {
+    font-family: 'Share Tech Mono', cursive;
+    padding: 5px 15px;
+    border-radius: 5px;
+    border-style: solid;
+    transition: 0.3s;
     border-color: var(--matrix-text);
     background-color: var(--matrix-text);
-    gap: 10px;
 }
 
-.btns>button:hover {
+.btns > button:hover {
     background-color: var(--color-background);
     border-color: var(--matrix-text);
     color: var(--matrix-text);

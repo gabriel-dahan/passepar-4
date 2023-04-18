@@ -1,11 +1,12 @@
-from . import db
+from . import db, app, scheduler
 from .etc import anonymize_email, linear_as_int_grid, rand_uid
 from .auth import AuthTokens
 
-from sqlalchemy.orm import backref
+from sqlalchemy.event import listens_for
 from dataclasses import dataclass
 from typing import List
 from datetime import datetime
+import datetime as d
 
 def game_uid() -> str:
     generated = rand_uid()
@@ -47,7 +48,8 @@ class Game(db.Model):
     matrix: str = db.Column(db.String(47), default = LINEAR_BASE_GRID, nullable = False)
     turn: int = db.Column(db.Integer, default = 1, nullable = False)
     status: int = db.Column(db.Integer, default = 0, nullable = False) # 1 if game started else 0 
-    created_at: datetime = db.Column(db.DateTime, default = datetime.now(), nullable = False)
+    created_at: datetime = db.Column(db.DateTime, default = datetime.now, nullable = False)
+    last_action: datetime = db.Column(db.DateTime, default = datetime.now, nullable = False)
     public: bool = db.Column(db.Boolean, nullable = False)
     created_by: bool = db.Column(db.String, db.ForeignKey('users.id'), nullable = False, unique = True)
 
@@ -66,6 +68,25 @@ class Game(db.Model):
             'owner': self.owner.json_repr()
         }
     
+@listens_for(db.session, 'before_flush')
+def update_last_action(session, flush_context, instances):
+    """ Updates the last_action datetime of an object each time a modification is done. """
+    for instance in session.dirty:
+        if isinstance(instance, Game):
+            instance.last_action = datetime.now()
+
+# --- INACTIVITY SCHEDULER --- #
+def delete_inactive_games():
+    """ Checks every 30 seconds if games have been inactive for more than 15 minutes and deletes them. """
+    with app.app_context():
+        games = Game.query.filter(Game.last_action < (datetime.now() - d.timedelta(minutes = 15))).all()
+        for game in games:
+            db.session.delete(game)
+        db.session.commit()
+
+scheduler.add_job(id = 'delete_inactive_games', func = delete_inactive_games, trigger = 'interval', seconds = 30)
+# ---------------------------- #
+
 @dataclass
 class User(db.Model):
     __tablename__ = 'users'

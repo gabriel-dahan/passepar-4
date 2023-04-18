@@ -184,6 +184,9 @@ const leaveGame = () => {
         
         
         <p class="guest-not-supported" v-if="!currentUser">Les utilisateurs invités ne sont pas encore supportés.</p>
+        <p class="not-authorized" v-else-if="currentUser.id !== game.owner.id && !isPlayer(currentUser.id) && currentUser.game_id">
+            Finissez votre partie en cours pour en rejoindre une nouvelle !
+        </p>
         <!-- PRE-GAME SCREEN -->
         <div class="pre-game" v-else-if="game.status === 0">
             <button class="delete-game" @click="deleteGame" v-if="currentUser?.id === game.owner.id && game.players.length < 2">Supprimer la partie ?</button>
@@ -302,6 +305,7 @@ const leaveGame = () => {
 
 #end-game > h1 {
     color: var(--matrix-text);
+    font-family: 'Press Start 2P', cursive;
 }
 
 .game-room > #end-game.active {
