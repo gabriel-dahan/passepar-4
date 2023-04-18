@@ -40,8 +40,8 @@
     - `password` : string
 
 - `/api/user/search?name=...&email=...&limit=10` : [`GET`] Returns all users maching a specific `name` (default: '') or `email` (default: '') with a `limit` of 10 users by default (max: 100).
-- `/api/user/<playerid>` : [`GET`] Returns informations about a given user.
-- `/api/user/<playerid>/update` : [`PUT`] Updates a user's informations.
+- `/api/user/<userid>` : [`GET`] Returns informations about a given user.
+- `/api/user/<userid>/update` : [`PUT`] Updates a user's informations.
 
     - `name`: string (optional)
     - `email` : string (optional)
@@ -51,6 +51,12 @@
 - `/api/user/token/<session_token>` : [`GET`] Get a player's informations using a registered session token.
 
 - `/api/user/token/<session_token>/delete` : [`DELETE`] Deletes a user's session.
+
+- `/api/user/<userid>/addscore` : [`PUT`] Adds `score` score to the specified user.
+    
+    - `score` : integer
+
+- `/api/user/all` : [`GET`] Returns all users.
 
 > **Error codes** : 
 >
