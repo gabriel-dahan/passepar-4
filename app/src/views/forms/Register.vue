@@ -15,7 +15,8 @@ const confPwd = ref('');
 
 const errors = ref({
     ...getRawErrs(),
-    noMatch: false
+    noMatch: false,
+    usernameNotValid: false
 });
 /* ------------ */
 
@@ -26,13 +27,25 @@ const pwdMatch = (e: KeyboardEvent) => {
         errors.value.noMatch = true;
 }
 
+const usernameIsValid = () => {
+    return /^[A-Za-z0-9_.\-]+$/.test(username.value) && username.value.length <= 20 && username.value.length > 0;
+}
+
+const usernameValidator = (e: KeyboardEvent) => {
+    if(!usernameIsValid())
+        errors.value.usernameNotValid = true;
+    else
+        errors.value.usernameNotValid = false;
+}
+
 const createUser = (e: SubmitEvent) => {
-    if (pwd.value == confPwd.value && pwd.value !== '' && confPwd.value !== '')
+    if (pwd.value == confPwd.value && pwd.value !== '' && confPwd.value !== '' && usernameIsValid())
         API.users.register(username.value, email.value, pwd.value)
             .then(data => {
                 errors.value = {
                     ...getRawErrs(),
-                    noMatch: false
+                    noMatch: false,
+                    usernameNotValid: false
                 };
                 if(data?.user)
                     router.push('/login')
@@ -49,8 +62,11 @@ const createUser = (e: SubmitEvent) => {
             <div class="f-field">
                 <label for="username">Nom d'utilisateur</label>
                 <input id="username" type="text" placeholder="PassePar4"
+                    @keyup="usernameValidator"
                     v-model="username">
                 <span class="f-error" v-if="errors.U1.S2">Ce nom est déjà utilisé.</span>
+                <span class="f-error" v-if="errors.usernameNotValid">Ce nom d'utilisateur est trop long ou n'est pas valide. 
+                    Il ne peut contenir que des lettres, des chiffres et les caractères '_', '-' et '.'.</span>
             </div>
             <div class="f-field">
                 <label for="email">Email</label>

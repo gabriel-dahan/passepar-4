@@ -23,7 +23,7 @@ const errors = ref(getRawErrs());
 
 let $socket: Socket = io();
 const initializeSocketConn = () => {
-    $socket = io(`http://${location.hostname}:5000/game`, {
+    $socket = io(`http://127.0.0.1:8001/game`, {
         path: '/websocket'
     });
 }
@@ -176,7 +176,7 @@ const leaveGame = () => {
             <p class="privacy private">Partie privée</p>
             <button 
                 @click="changeGamePrivacy"
-                v-if="game.status === 0 && game.owner.id === currentUser.id"
+                v-if="game.status === 0 && game.owner.id === currentUser?.id"
             >
                 Changer ?
             </button>
