@@ -4,7 +4,7 @@
 
 Ce projet est une adaptation du fameux *Puissance 4* pour le web, étendu à un système plus 'compétitif', dans le thème de Matrix&copy;. Il est constitué de deux parties distinctes : l'**API**, faite en Python (avec Flask), qui gère toute la partie logistique, base de données, websockets, etc. ; et l'**application** à proprement parler, faite en HTML, CSS, JS (TypeScript), le tout à l'aide de VueJS (framework), qui applique toutes les données fournies par l'API au site pour assurer son bon fonctionnement.
 
-Voici une version hébergée du projet : http://51.83.73.242:5173/
+Voici une version hébergée du projet : https://passepar4.fr/
 
 ## Installation
 
